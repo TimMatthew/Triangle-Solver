@@ -1,9 +1,9 @@
-class MarkPointNode extends ASTNode {
+class MarPointCommand extends CommandNode{
     private final String pointID;
     private final int x;
     private final int y;
 
-    public MarkPointNode(String pointID, int x, int y) {
+    public MarPointCommand(String pointID, int x, int y) {
         this.pointID = pointID;
         this.x = x;
         this.y = y;
@@ -14,7 +14,7 @@ class MarkPointNode extends ASTNode {
     public int getY() { return y; }
 
     @Override
-    public void accept(TaskVisitor visitor) {
-        visitor.visit(this);
+    public void execute() {
+        System.out.println("Point");
     }
 }
