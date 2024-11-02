@@ -1,9 +1,9 @@
-class MarkPointCommand extends CommandNode{
+class MarkPointNode implements CommandNode{
     private final String pointID;
     private final int x;
     private final int y;
 
-    public MarkPointCommand(String pointID, int x, int y) {
+    public MarkPointNode(String pointID, int x, int y) {
         this.pointID = pointID;
         this.x = x;
         this.y = y;
@@ -13,6 +13,8 @@ class MarkPointCommand extends CommandNode{
     public int getX() { return x; }
     public int getY() { return y; }
 
+
+    // Після синтаксичного розбору створення малюнку
     @Override
     public void execute() {
         System.out.println("Point");

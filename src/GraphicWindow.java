@@ -48,7 +48,7 @@ public class GraphicWindow extends JPanel {
         }
     }
 
-    public static void createAndShowGUI() {
+    public static GraphicWindow createAndShowGUI() {
         JFrame frame = new JFrame("Cartesian Coordinate System");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         GraphicWindow panel = new GraphicWindow();
@@ -57,6 +57,7 @@ public class GraphicWindow extends JPanel {
         frame.pack();
         frame.setLocationRelativeTo(null);
         frame.setVisible(true);
+        return panel;
     }
 
     public static void main(String[] args) {

@@ -46,40 +46,46 @@ public class LexicalAnalyzer {
         String[] words = sentence.split("\\s+|(?=[();,])|(?<=[();,])");
 
         for (String word : words) {
+
             if (POINT_PATTERN.matcher(word).matches() || (word.matches("центр[омі]+") && tokens.stream().anyMatch(t -> t.getToken() == Token.CIRCLE))) {
                 tokens.add(new Pair(Token.POINT, word));
-            } else if (CIRCLE_PATTERN.matcher(word).matches()) {
+            }
+            else if (CIRCLE_PATTERN.matcher(word).matches()) {
                 tokens.add(new Pair(Token.CIRCLE, word));
-            } else if (DIAMETER_PATTERN.matcher(word).matches()) {
+            }
+            else if (DIAMETER_PATTERN.matcher(word).matches()) {
                 tokens.add(new Pair(Token.DIAMETER, word));
-            } else if (RADIUS_PATTERN.matcher(word).matches()) {
+            }
+            else if (RADIUS_PATTERN.matcher(word).matches()) {
                 tokens.add(new Pair(Token.RADIUS, word));
-            } else if (CHORD_PATTERN.matcher(word).matches()) {
+            }
+            else if (CHORD_PATTERN.matcher(word).matches()) {
                 tokens.add(new Pair(Token.CHORD, word));
-            } else if (COORDINATE_PATTERN.matcher(word).matches()) {
+            }
+            else if (COORDINATE_PATTERN.matcher(word).matches()) {
                 tokens.add(new Pair(Token.INTEGER, word));
-            } else if (IDENTIFIER_PATTERN.matcher(word).matches()) {
+            }
+            else if (IDENTIFIER_PATTERN.matcher(word).matches()) {
+
                 if (word.length() == 2) {
                     tokens.add(new Pair(Token.POINT, "точка"));
                     tokens.add(new Pair(Token.ID, String.valueOf(word.charAt(0))));
                     tokens.add(new Pair(Token.POINT, "точка"));
                     tokens.add(new Pair(Token.ID, String.valueOf(word.charAt(1))));
-                } else {
-                    tokens.add(new Pair(Token.ID, word));
                 }
-            } else {
-                tokens.add(new Pair(Token.EXTRA, word));
+                else tokens.add(new Pair(Token.ID, word));
+
             }
+            else tokens.add(new Pair(Token.EXTRA, word));
         }
         return tokens;
     }
 
     private List<Pair> dropExtraTokens(List<Pair> tokens) {
         List<Pair> filteredTokens = new ArrayList<>();
+
         for (Pair token : tokens) {
-            if (token.getToken() != Token.EXTRA) {
-                filteredTokens.add(token);
-            }
+            if (token.getToken() != Token.EXTRA) filteredTokens.add(token);
         }
         return filteredTokens;
     }
@@ -119,9 +125,8 @@ public class LexicalAnalyzer {
                     }
                 }
             }
-            else {
-                currentGroup.add(token);
-            }
+            else currentGroup.add(token);
+
         }
         return result;
     }

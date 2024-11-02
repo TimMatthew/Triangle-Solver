@@ -6,11 +6,11 @@ public class Main {
 
     public static void main(String[] args) {
 
-        //SwingUtilities.invokeLater(GraphicWindow::createAndShowGUI);
+        GraphicWindow window = GraphicWindow.createAndShowGUI();
 
         StringBuilder testConstructor = new StringBuilder();
 
-        try (BufferedReader br = new BufferedReader(new FileReader("tests/test1.txt"))) {
+        try (BufferedReader br = new BufferedReader(new FileReader("tests/test3.txt"))) {
             String line;
             while ((line = br.readLine()) != null) {
                 testConstructor.append(line).append("\n");
@@ -26,20 +26,17 @@ public class Main {
         // Лексичний аналіз
         LexicalAnalyzer la = new LexicalAnalyzer();
         List<List<Pair>> text = la.analyze(task);
-        System.out.println("dskjfsdof");
 
         for (List<Pair> sentence : text) {
             System.out.println(sentence);
         }
 
         // Синтаксичний аналіз
-        SyntaxParser sa = new SyntaxParser();
+        SyntaxParser sa = new SyntaxParser(text);
 
-        List<CommandNode> tree = new ArrayList<>();
-
-        for (List<Pair> tokens : text){
-
-        }
+        List<CommandNode> syntaxTree = new ArrayList<>();
+        List<CommandNode> IDsTable = new ArrayList<>();
+        sa.parse(syntaxTree, IDsTable);
 
         System.out.println("Syntax analysis completed successfully.");
     }

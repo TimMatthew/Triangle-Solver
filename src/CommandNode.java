@@ -1,4 +1,4 @@
-public abstract class CommandNode {
+public interface CommandNode {
 
-    public void execute() {}
+    public void execute();
 }
