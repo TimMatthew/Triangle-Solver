@@ -21,7 +21,7 @@ public class DrawRadiusNode implements CommandNode{
     }
 
     @Override
-    public void execute() {
-
+    public String getId() {
+        return id;
     }
 }

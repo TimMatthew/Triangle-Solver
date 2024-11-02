@@ -12,16 +12,47 @@ public class DrawChordNode implements CommandNode{
         this.end = p2;
     }
 
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public String getStart() {
+        return start;
+    }
+
+    public void setStart(String start) {
+        this.start = start;
+    }
+
+    public String getEnd() {
+        return end;
+    }
+
+    public void setEnd(String end) {
+        this.end = end;
+    }
+
+    public MarkPointNode getStartNode() {
+        return startNode;
+    }
+
+    public MarkPointNode getEndNode() {
+        return endNode;
+    }
+
     public void setStartNode(MarkPointNode startNode) {
         this.startNode = startNode;
     }
+
+
 
     public void setEndNode(MarkPointNode endNode) {
         this.endNode = endNode;
     }
 
-    @Override
-    public void execute() {
 
+    @Override
+    public String getId() {
+        return id;
     }
 }

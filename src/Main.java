@@ -6,11 +6,11 @@ public class Main {
 
     public static void main(String[] args) {
 
-        GraphicWindow window = GraphicWindow.createAndShowGUI();
+
 
         StringBuilder testConstructor = new StringBuilder();
 
-        try (BufferedReader br = new BufferedReader(new FileReader("tests/test3.txt"))) {
+        try (BufferedReader br = new BufferedReader(new FileReader("tests/test1.txt"))) {
             String line;
             while ((line = br.readLine()) != null) {
                 testConstructor.append(line).append("\n");
@@ -38,6 +38,11 @@ public class Main {
         List<CommandNode> IDsTable = new ArrayList<>();
         sa.parse(syntaxTree, IDsTable);
 
-        System.out.println("Syntax analysis completed successfully.");
+
+        // Виконання задач
+        GraphicWindow window = GraphicWindow.createAndShowGUI();
+        window.setSyntaxTree(syntaxTree);
+        window.setIdTable(IDsTable);
+
     }
 }

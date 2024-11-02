@@ -17,7 +17,7 @@ public class LexicalAnalyzer {
 
 
     private static final Pattern POINT_PATTERN = Pattern.compile("[тТ]очк[аиу]+");
-    private static final Pattern CIRCLE_PATTERN = Pattern.compile("[кК]ол[оа]+");
+    private static final Pattern CIRCLE_PATTERN = Pattern.compile("[кК]ол[оіа]+");
     private static final Pattern DIAMETER_PATTERN = Pattern.compile("[дД]іаметр[аи]*");
     private static final Pattern RADIUS_PATTERN = Pattern.compile("[рР]адіус[аи]*");
     private static final Pattern CHORD_PATTERN = Pattern.compile("[хХ]орд[аиу]");

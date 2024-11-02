@@ -6,6 +6,10 @@ public class DrawCircleNode implements CommandNode {
     int centerX;
     int centerY;
 
+    public int getRadius() {
+        return radius;
+    }
+
     public DrawCircleNode(int radius, String center) {
         this.radius = radius;
         this.centerId = center;
@@ -18,12 +22,32 @@ public class DrawCircleNode implements CommandNode {
         this.centerY = centerY;
     }
 
-    public void setCenterNode(MarkPointNode centerNode) {
-        this.centerNode = centerNode;
+    public int getCenterX() {
+        return centerX;
+    }
+
+    public int getCenterY() {
+        return centerY;
+    }
+
+    public void setCenterX(int centerX) {
+        this.centerX = centerX;
+    }
+
+    public void setCenterY(int centerY) {
+        this.centerY = centerY;
+    }
+
+    public MarkPointNode getCenterNode() {
+        return centerNode;
     }
 
     @Override
-    public void execute() {
+    public String getId() {
+        return centerId;
+    }
 
+    public void setCenterNode(MarkPointNode centerNode) {
+        this.centerNode = centerNode;
     }
 }

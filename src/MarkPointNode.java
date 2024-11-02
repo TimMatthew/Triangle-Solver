@@ -16,7 +16,7 @@ class MarkPointNode implements CommandNode{
 
     // Після синтаксичного розбору створення малюнку
     @Override
-    public void execute() {
-        System.out.println("Point");
+    public String getId() {
+        return pointID;
     }
 }

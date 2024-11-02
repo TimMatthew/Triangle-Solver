@@ -1,4 +1,5 @@
 public interface CommandNode {
 
-    public void execute();
+    public String getId();
+
 }

@@ -75,9 +75,17 @@ class SyntaxParser {
                         expect(LexicalAnalyzer.Token.INTEGER, curPair.getToken());
                         int y = Integer.parseInt(curPair.getValue());
 
-                        syntaxTree.add(new DrawCircleNode(r, center, x, y));
+                        syntaxTree.add(new MarkPointNode(center, x, y));
+
+                        DrawCircleNode circleNode = new DrawCircleNode(r, center, x, y);
+                        circleNode.setCenterNode(new MarkPointNode(center, x, y));
+                        syntaxTree.add(circleNode);
+                        idTable.add(circleNode);
                     }
-                    else syntaxTree.add(new DrawCircleNode(r, center));
+                    else {
+                        syntaxTree.add(new DrawCircleNode(r, center));
+                        idTable.add(new DrawCircleNode(r, center));
+                    }
 
                 }
 
