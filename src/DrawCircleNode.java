@@ -1,10 +1,10 @@
 public class DrawCircleNode implements CommandNode {
 
-    int radius;
-    MarkPointNode centerNode;
-    String centerId;
-    int centerX;
-    int centerY;
+    private int radius;
+    private MarkPointNode centerNode;
+    private String centerId;
+    private int centerX;
+    private int centerY;
 
     public int getRadius() {
         return radius;

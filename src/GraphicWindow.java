@@ -33,9 +33,9 @@ public class GraphicWindow extends JPanel {
         int coordX = getWidth() / 2 + x * STEP_SIZE;
         int coordY = getHeight() / 2 - y * STEP_SIZE;
         g.setColor(Color.BLACK);
-        g.fillOval(coordX - 5, coordY - 5, 10, 10); // Draw the point
+        g.fillOval(coordX - 5, coordY - 5, 10, 10);   
         g.setFont(new Font("Arial Black", Font.PLAIN, 14));
-        g.drawString(id, coordX + 5, coordY - 5); // Draw the identifier
+        g.drawString(id, coordX + 5, coordY - 5);   
     }
 
     private void drawCircle(Graphics g, int x, int y, int radius, MarkPointNode node){
@@ -56,7 +56,6 @@ public class GraphicWindow extends JPanel {
 
         Graphics2D g2d = (Graphics2D) g;
         g2d.setStroke(new BasicStroke(2.0f));
-        //g.setColor(Color.BLUE);
         g.drawOval(coordX-coordRadius/2, coordY-coordRadius/2, coordRadius, coordRadius);
     }
 
@@ -73,17 +72,30 @@ public class GraphicWindow extends JPanel {
         g.drawLine(coordStartX, coordStartY, coordEndX, coordEndY);
     }
 
-    private void drawDiameter(Graphics g, int startX, int startY, int radius, String nextPointId){
+    private void drawSegment(Graphics g, int startX, int startY, int endX, int endY) {
+        int coordStartX = getWidth() / 2 + startX * STEP_SIZE;
+        int coordStartY = getHeight() / 2 - startY * STEP_SIZE;
+        int coordEndX = getWidth() / 2 + endX * STEP_SIZE;
+        int coordEndY =  getHeight() / 2 - endY * STEP_SIZE;
 
-//        int coordStartX = getWidth() / 2 + startX * STEP_SIZE;
-//        int coordStartY = getHeight() / 2 - startY * STEP_SIZE;
-//        int coordEndX = getWidth() / 2 + endX * STEP_SIZE;
-//        int coordEndY =  getHeight() / 2 - endY * STEP_SIZE;
-//
-//        Graphics2D g2d = (Graphics2D) g;
-//        g2d.setStroke(new BasicStroke(2.0f));
-//        g.setColor(Color.BLUE);
-//        g.drawLine(coordStartX, coordStartY, coordEndX, coordEndY);
+        Graphics2D g2d = (Graphics2D) g;
+        g2d.setStroke(new BasicStroke(2.0f));
+        g.setColor(Color.BLUE);
+        g.drawLine(coordStartX, coordStartY, coordEndX, coordEndY);
+    }
+
+
+    private void drawRadius(Graphics g, int centerX, int centerY, int endX, int endY){
+
+        int coordStartX = getWidth() / 2 + centerX * STEP_SIZE;
+        int coordStartY = getHeight() / 2 - centerY * STEP_SIZE;
+        int coordEndX = getWidth() / 2 + endX * STEP_SIZE;
+        int coordEndY =  getHeight() / 2 - endY * STEP_SIZE;
+
+        Graphics2D g2d = (Graphics2D) g;
+        g2d.setStroke(new BasicStroke(2.0f));
+        g.setColor(Color.BLUE);
+        g.drawLine(coordStartX, coordStartY, coordEndX, coordEndY);
     }
 
     private void drawCartesianGrid(Graphics g) {
@@ -121,64 +133,86 @@ public class GraphicWindow extends JPanel {
 
             if (node instanceof MarkPointNode markPoint) {
                 drawPoint(g, markPoint.getX(), markPoint.getY(), markPoint.getPointID());
-            }
-
-            else if(node instanceof DrawCircleNode circleNode){
-
-                if(circleNode.getCenterNode() == null){
-                    for(CommandNode id : idTable){
-
-                        if(id instanceof MarkPointNode){
-
+            } else if (node instanceof DrawCircleNode circleNode) {
+                if (circleNode.getCenterNode() == null) {
+                    for (CommandNode id : idTable) {
+                        if (id instanceof MarkPointNode) {
                             String identifier = id.getId();
-                            if (circleNode.getId().equals(identifier)){
+                            if (circleNode.getId().equals(identifier)) {
                                 circleNode.setCenterNode((MarkPointNode) id);
                                 circleNode.setCenterX(((MarkPointNode) id).getX());
                                 circleNode.setCenterY(((MarkPointNode) id).getY());
-                                drawCircle(g,circleNode.getCenterNode().getX(),  circleNode.getCenterNode().getY(), circleNode.getRadius(), circleNode.getCenterNode());
+                                drawCircle(g, circleNode.getCenterNode().getX(), circleNode.getCenterNode().getY(), circleNode.getRadius(), circleNode.getCenterNode());
                             }
                         }
                     }
+                } else {
+                    drawCircle(g, circleNode.getCenterNode().getX(), circleNode.getCenterNode().getY(), circleNode.getRadius(), circleNode.getCenterNode());
                 }
-                else {
-                    drawCircle(g,circleNode.getCenterNode().getX(),  circleNode.getCenterNode().getY(), circleNode.getRadius(), circleNode.getCenterNode());
-                }
-            }
-
-            else if(node instanceof DrawChordNode diameterNode){
-                for(CommandNode id : idTable){
-
-                    if(id instanceof MarkPointNode ){
+            } else if (node instanceof DrawChordNode chordNode) {
+                for (CommandNode id : idTable) {
+                    if (id instanceof MarkPointNode) {
                         String identifier = id.getId();
+                        if (chordNode.getStart().equals(identifier)) {
+                            chordNode.setStartNode((MarkPointNode) id);
+                        } else if (chordNode.getEnd().equals(identifier)) {
+                            chordNode.setEndNode((MarkPointNode) id);
+                        }
 
-                        if(diameterNode.getStart().equals(identifier)) diameterNode.setStartNode((MarkPointNode) id);
-                        else if (diameterNode.getEnd().equals(identifier)) diameterNode.setEndNode((MarkPointNode) id);
-
-                        if(diameterNode.getStartNode() != null && diameterNode.getEndNode()!=null){
-                            drawChord(g, diameterNode.getStartNode().getX(), diameterNode.getStartNode().getY(), diameterNode.getEndNode().getX(), diameterNode.getEndNode().getY());
+                        if (chordNode.getStartNode() != null && chordNode.getEndNode() != null) {
+                            drawChord(g, chordNode.getStartNode().getX(), chordNode.getStartNode().getY(), chordNode.getEndNode().getX(), chordNode.getEndNode().getY());
                         }
                     }
                 }
-            }
+            } else if (node instanceof DrawSegmentNode segmentNode) {
 
-            else if(node instanceof DrawDiameterNode diameterNode){
-                for(CommandNode id : idTable){
+                MarkPointNode startNode = null;
+                MarkPointNode endNode = null;
 
-                    if(id instanceof MarkPointNode ){
+                for (CommandNode id : idTable) {
+                    if (id instanceof MarkPointNode) {
                         String identifier = id.getId();
 
-                        if(diameterNode.getStart().equals(identifier)) diameterNode.setStartNode((MarkPointNode) id);
-                        else if (diameterNode.getEnd().equals(identifier)) diameterNode.setEndNode((MarkPointNode) id);
-
-                        if(diameterNode.getStartNode() != null && diameterNode.getEndNode()!=null){
-                            drawChord(g, diameterNode.getStartNode().getX(), diameterNode.getStartNode().getY(), diameterNode.getEndNode().getX(), diameterNode.getEndNode().getY());
+                        if (segmentNode.getStart().equals(identifier)) {
+                            startNode = (MarkPointNode) id;
+                        } else if (segmentNode.getEnd().equals(identifier)) {
+                            endNode = (MarkPointNode) id;
                         }
+                    } else if (id instanceof DrawCircleNode circleNode) {
+                        String circleId = circleNode.getId();
+
+                          
+                        if (segmentNode.getStart().equals(circleId)) {
+                            startNode = circleNode.getCenterNode();
+                        } else if (segmentNode.getEnd().equals(circleId)) {
+                            endNode = circleNode.getCenterNode();
+                        }
+                    }
+
+                      
+                    if (startNode != null && endNode != null) {
+                        drawSegment(g, startNode.getX(), startNode.getY(), endNode.getX(), endNode.getY());
+                    }
+                }
+            } else if (node instanceof DrawRadiusNode radiusNode) {
+                String radiusCenterID = radiusNode.getCenter();
+                String radiusEndID = radiusNode.getEnd();
+
+                for (CommandNode commandNode : idTable) {
+                    if (commandNode instanceof MarkPointNode && ((MarkPointNode) commandNode).getPointID().equals(radiusCenterID)) {
+                        radiusNode.setCenterNode((MarkPointNode) commandNode);
+                    } else if (commandNode instanceof MarkPointNode && ((MarkPointNode) commandNode).getPointID().equals(radiusEndID)) {
+                        radiusNode.setEndNode((MarkPointNode) commandNode);
+                    }
+
+                    if (radiusNode.getCenterNode() != null && radiusNode.getEndNode() != null) {
+                        drawRadius(g, radiusNode.getCenterNode().getX(), radiusNode.getCenterNode().getY(), radiusNode.getEndNode().getX(), radiusNode.getEndNode().getY());
                     }
                 }
             }
-            // Handle other node types as needed
         }
     }
+
 
     public static GraphicWindow createAndShowGUI() {
         JFrame frame = new JFrame("Cartesian Coordinate System");

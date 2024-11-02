@@ -1,27 +1,35 @@
-public class DrawDiameterNode implements CommandNode{
+public class DrawSegmentNode implements CommandNode{
 
     String id;
-
     String start;
     String end;
     MarkPointNode startNode;
     MarkPointNode endNode;
 
-
-
-
-    public DrawDiameterNode(String id, String p1, String p2) {
+    public DrawSegmentNode(String id, String p1, String p2) {
         this.id = id;
         this.start = p1;
         this.end = p2;
+    }
+
+    public void setId(String id) {
+        this.id = id;
     }
 
     public String getStart() {
         return start;
     }
 
+    public void setStart(String start) {
+        this.start = start;
+    }
+
     public String getEnd() {
         return end;
+    }
+
+    public void setEnd(String end) {
+        this.end = end;
     }
 
     public MarkPointNode getStartNode() {
@@ -36,12 +44,13 @@ public class DrawDiameterNode implements CommandNode{
         this.startNode = startNode;
     }
 
+
+
     public void setEndNode(MarkPointNode endNode) {
         this.endNode = endNode;
     }
-
     @Override
     public String getId() {
-        return id;
+        return null;
     }
 }

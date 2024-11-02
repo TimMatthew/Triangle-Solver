@@ -10,7 +10,7 @@ public class Main {
 
         StringBuilder testConstructor = new StringBuilder();
 
-        try (BufferedReader br = new BufferedReader(new FileReader("tests/test1.txt"))) {
+        try (BufferedReader br = new BufferedReader(new FileReader("tests/test2.txt"))) {
             String line;
             while ((line = br.readLine()) != null) {
                 testConstructor.append(line).append("\n");

@@ -8,9 +8,9 @@ import java.util.List;
     Sentence -> MarkPoint | DrawCircle | DrawDiameter | DrawRadius | DrawChord | '.' | #
     MarkPoint -> 'POINT' ID INTEGER INTEGER
     DrawCircle -> 'CIRCLE' INTEGER 'POINT' ID (INTEGER INTEGER)
-    DrawDiameter -> 'DIAMETER' 'POINT' ID 'POINT' ID
     DrawRadius -> 'RADIUS' 'POINT' ID 'POINT' ID
     DrawChord -> 'CHORD' 'POINT' ID 'POINT' ID
+    DrawSegment -> 'SEGMENT' 'POINT' ID 'POINT' ID
     ID -> [A-Z]
     INTEGER -> [0-9]+
 */
@@ -46,8 +46,9 @@ class SyntaxParser {
                     expect(LexicalAnalyzer.Token.INTEGER, curPair.getToken());
                     int y = Integer.parseInt(curPair.getValue());
 
-                    idTable.add(new MarkPointNode(id, x, y));
-                    syntaxTree.add(new MarkPointNode(id, x, y));
+                    MarkPointNode markPointNode = new MarkPointNode(id, x, y);
+                    idTable.add(markPointNode);
+                    syntaxTree.add(markPointNode);
                 }
 
                 case CIRCLE -> {
@@ -76,17 +77,14 @@ class SyntaxParser {
                         int y = Integer.parseInt(curPair.getValue());
 
                         syntaxTree.add(new MarkPointNode(center, x, y));
-
                         DrawCircleNode circleNode = new DrawCircleNode(r, center, x, y);
                         circleNode.setCenterNode(new MarkPointNode(center, x, y));
                         syntaxTree.add(circleNode);
                         idTable.add(circleNode);
-                    }
-                    else {
+                    } else {
                         syntaxTree.add(new DrawCircleNode(r, center));
                         idTable.add(new DrawCircleNode(r, center));
                     }
-
                 }
 
                 case RADIUS -> {
@@ -114,31 +112,6 @@ class SyntaxParser {
                     syntaxTree.add(new DrawRadiusNode(radId, idStart, idEnd));
                 }
 
-                case DIAMETER -> {
-                    pos++;
-                    curPair = sentence.get(pos);
-                    expect(LexicalAnalyzer.Token.POINT, curPair.getToken());
-
-                    pos++;
-                    curPair = sentence.get(pos);
-                    expect(LexicalAnalyzer.Token.ID, curPair.getToken());
-                    String idStart = curPair.getValue();
-
-                    pos++;
-                    curPair = sentence.get(pos);
-                    expect(LexicalAnalyzer.Token.POINT, curPair.getToken());
-
-                    pos++;
-                    curPair = sentence.get(pos);
-                    expect(LexicalAnalyzer.Token.ID, curPair.getToken());
-                    String idEnd = curPair.getValue();
-
-                    String diamId = idStart + idEnd;
-
-                    idTable.add(new DrawDiameterNode(diamId, idStart, idEnd));
-                    syntaxTree.add(new DrawDiameterNode(diamId, idStart, idEnd));
-                }
-
                 case CHORD -> {
                     pos++;
                     curPair = sentence.get(pos);
@@ -163,9 +136,35 @@ class SyntaxParser {
                     idTable.add(new DrawChordNode(chordId, idStart, idEnd));
                     syntaxTree.add(new DrawChordNode(chordId, idStart, idEnd));
                 }
+
+                case SEGMENT -> {
+                    pos++;
+                    curPair = sentence.get(pos);
+                    expect(LexicalAnalyzer.Token.POINT, curPair.getToken());
+
+                    pos++;
+                    curPair = sentence.get(pos);
+                    expect(LexicalAnalyzer.Token.ID, curPair.getToken());
+                    String idStart = curPair.getValue();
+
+                    pos++;
+                    curPair = sentence.get(pos);
+                    expect(LexicalAnalyzer.Token.POINT, curPair.getToken());
+
+                    pos++;
+                    curPair = sentence.get(pos);
+                    expect(LexicalAnalyzer.Token.ID, curPair.getToken());
+                    String idEnd = curPair.getValue();
+
+                    String segmentId = idStart + idEnd;
+
+                    idTable.add(new DrawSegmentNode(segmentId, idStart, idEnd));
+                    syntaxTree.add(new DrawSegmentNode(segmentId, idStart, idEnd));
+                }
             }
         }
     }
+
 
 
     public void expect(LexicalAnalyzer.Token expected, LexicalAnalyzer.Token retrieved){
