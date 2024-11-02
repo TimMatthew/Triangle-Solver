@@ -1,9 +1,9 @@
-class MarPointCommand extends CommandNode{
+class MarkPointCommand extends CommandNode{
     private final String pointID;
     private final int x;
     private final int y;
 
-    public MarPointCommand(String pointID, int x, int y) {
+    public MarkPointCommand(String pointID, int x, int y) {
         this.pointID = pointID;
         this.x = x;
         this.y = y;

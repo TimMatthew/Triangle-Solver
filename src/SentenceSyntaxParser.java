@@ -20,13 +20,22 @@ import java.util.List;
 */
 
 
-class SentenceSyntaxParser {
+class SyntaxParser {
     private List<String> sentenceTokens;
     private int pos = 0;
 
-//    public static CommandNode parse(List<String> sentence){
+//    public CommandNode parse(List<String> sentence){
 //
+//        String first = sentence.getFirst();
+//
+//        switch (first){
+//
+//            case 'POINT':
+//                expect()
+//        }
 //    }
+
+//    public void expect(String word)
 
 
 

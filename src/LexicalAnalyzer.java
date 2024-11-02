@@ -4,137 +4,128 @@ import java.util.regex.Pattern;
 
 public class LexicalAnalyzer {
 
-
-    enum Tokens{
+    enum Token {
         CIRCLE,
         POINT,
         RADIUS,
         DIAMETER,
         CHORD,
+        ID,
+        INTEGER,
+        EXTRA
     }
 
 
-    // Define token patterns
     private static final Pattern POINT_PATTERN = Pattern.compile("[тТ]очк[аиу]+");
     private static final Pattern CIRCLE_PATTERN = Pattern.compile("[кК]ол[оа]+");
-    private static final Pattern DIAMETER_PATTERN = Pattern.compile("[дД]іаметр[а]*");
-    private static final Pattern RADIUS_PATTERN = Pattern.compile("[рР]адіус[а]*");
+    private static final Pattern DIAMETER_PATTERN = Pattern.compile("[дД]іаметр[аи]*");
+    private static final Pattern RADIUS_PATTERN = Pattern.compile("[рР]адіус[аи]*");
     private static final Pattern CHORD_PATTERN = Pattern.compile("[хХ]орд[аиу]");
     private static final Pattern COORDINATE_PATTERN = Pattern.compile("-*\\d+");
     private static final Pattern IDENTIFIER_PATTERN = Pattern.compile("[A-Z]{1,2}");
 
-    public List<List<String>> analyze(String text) {
-
+    public List<List<Pair>> analyze(String text) {
         String[] sentences = text.split("\\.");
+        List<List<Pair>> tree = new ArrayList<>();
 
-        // Step 2: Process each sentence into tokens
-        List<List<String>> tree = new ArrayList<>();
         for (String sentence : sentences) {
-
-            List<String> tokens = tokenize(sentence.trim());
-
+            List<Pair> tokens = tokenize(sentence.trim());
             tokens = dropExtraTokens(tokens);
 
-            List<List<String>> splitTokens;
-
-            if(tokens.size()>5 && tokens.getFirst().matches("CHORD|RADIUS|DIAMETER")) {
-                splitTokens = splitTokenGroups(tokens);  // Split token groups here
-                tree.addAll(splitTokens);
+            if (tokens.size() > 5 && tokens.get(0).getToken().toString().matches("CHORD|RADIUS|DIAMETER")) {
+                tree.addAll(splitTokenGroups(tokens));
+            } else {
+                tree.add(tokens);
             }
-            else tree.add(tokens);
         }
-
         return tree;
     }
 
-    private List<String> tokenize(String sentence) {
-        List<String> tokens = new ArrayList<>();
+    private List<Pair> tokenize(String sentence) {
+        List<Pair> tokens = new ArrayList<>();
         String[] words = sentence.split("\\s+|(?=[();,])|(?<=[();,])");
 
         for (String word : words) {
-            if (POINT_PATTERN.matcher(word).matches() || (word.matches("центр[омі]+") && tokens.contains("CIRCLE"))) {
-                tokens.add("POINT");
-            }
-            else if (CIRCLE_PATTERN.matcher(word).matches()) {
-                tokens.add("CIRCLE");
-            }
-            else if (DIAMETER_PATTERN.matcher(word).matches()) {
-                tokens.add("DIAMETER");
-            }
-            else if (RADIUS_PATTERN.matcher(word).matches()) {
-                tokens.add("RADIUS");
-            }
-            else if (CHORD_PATTERN.matcher(word).matches()) {
-                tokens.add("CHORD");
-            }
-            else if (COORDINATE_PATTERN.matcher(word).matches()) {
-                tokens.add(word); // retain number as is
-            }
-            else if (IDENTIFIER_PATTERN.matcher(word).matches()) {
-
-                // На випадок відрізків
-                if(word.length()==2){
-                    String id1 = String.valueOf(word.charAt(0)), id2 = String.valueOf(word.charAt(1));
-                    tokens.add("POINT");
-                    tokens.add(id1);
-                    tokens.add("POINT");
-                    tokens.add(id2);
+            if (POINT_PATTERN.matcher(word).matches() || (word.matches("центр[омі]+") && tokens.stream().anyMatch(t -> t.getToken() == Token.CIRCLE))) {
+                tokens.add(new Pair(Token.POINT, word));
+            } else if (CIRCLE_PATTERN.matcher(word).matches()) {
+                tokens.add(new Pair(Token.CIRCLE, word));
+            } else if (DIAMETER_PATTERN.matcher(word).matches()) {
+                tokens.add(new Pair(Token.DIAMETER, word));
+            } else if (RADIUS_PATTERN.matcher(word).matches()) {
+                tokens.add(new Pair(Token.RADIUS, word));
+            } else if (CHORD_PATTERN.matcher(word).matches()) {
+                tokens.add(new Pair(Token.CHORD, word));
+            } else if (COORDINATE_PATTERN.matcher(word).matches()) {
+                tokens.add(new Pair(Token.INTEGER, word));
+            } else if (IDENTIFIER_PATTERN.matcher(word).matches()) {
+                if (word.length() == 2) {
+                    tokens.add(new Pair(Token.POINT, "точка"));
+                    tokens.add(new Pair(Token.ID, String.valueOf(word.charAt(0))));
+                    tokens.add(new Pair(Token.POINT, "точка"));
+                    tokens.add(new Pair(Token.ID, String.valueOf(word.charAt(1))));
+                } else {
+                    tokens.add(new Pair(Token.ID, word));
                 }
-                else tokens.add(word); // retain identifier as is
-            }
-            else {
-                tokens.add("EXTRA"); // mark as extra
+            } else {
+                tokens.add(new Pair(Token.EXTRA, word));
             }
         }
         return tokens;
     }
 
-    private List<String> dropExtraTokens(List<String> tokens) {
-        List<String> filteredTokens = new ArrayList<>();
-        for (String token : tokens) {
-            if (!"EXTRA".equals(token)) {
+    private List<Pair> dropExtraTokens(List<Pair> tokens) {
+        List<Pair> filteredTokens = new ArrayList<>();
+        for (Pair token : tokens) {
+            if (token.getToken() != Token.EXTRA) {
                 filteredTokens.add(token);
             }
         }
         return filteredTokens;
     }
 
-    private List<List<String>> splitTokenGroups(List<String> tokens) {
-        List<List<String>> result = new ArrayList<>();
-        List<String> currentGroup = new ArrayList<>();
+    private List<List<Pair>> splitTokenGroups(List<Pair> tokens) {
+        List<List<Pair>> result = new ArrayList<>();
+        List<Pair> currentGroup = new ArrayList<>();
 
-        String lastShapeToken = null;
+        Pair curShapeToken = null;
+
         for (int i = 0; i < tokens.size(); i++) {
-            String token = tokens.get(i);
 
-            // Check if the token is a shape token (CHORD, DIAMETER, RADIUS)
-            if (token.equals("CHORD") || token.equals("DIAMETER") || token.equals("RADIUS")) {
-                if (!currentGroup.isEmpty()) {
-                    result.add(new ArrayList<>(currentGroup));
-                    currentGroup.clear();
-                }
+            Pair token = tokens.get(i);
+            if (token.getToken() == Token.CHORD || token.getToken() == Token.DIAMETER || token.getToken() == Token.RADIUS) {
+
+                if (currentGroup.size() == 5) result.add(new ArrayList<>(currentGroup));
+
+                if(!currentGroup.isEmpty() && !currentGroup.getFirst().equals(token)) currentGroup.clear();
                 currentGroup.add(token);
-                lastShapeToken = token;
-            } else if (token.equals("POINT") && lastShapeToken != null && i + 1 < tokens.size() && tokens.get(i + 1).matches("[A-Z]")) {
-                // Add each "POINT" followed by an identifier to the current group
-                currentGroup.add("POINT");
-                currentGroup.add(tokens.get(i + 1));
-                i++; // Skip next identifier since it's been added already
+                curShapeToken = token;
+            }
+            else if (token.getToken() == Token.POINT && curShapeToken != null && i + 1 < tokens.size()) {
 
-                // Check if we have a complete shape with two points, add to result if so
-                if (currentGroup.size() == 5) {
-                    result.add(new ArrayList<>(currentGroup));
-                    currentGroup.clear();
-                    currentGroup.add(lastShapeToken);  // Start a new group with the shape token
+                currentGroup.add(token);
+                currentGroup.add(tokens.get(i + 1));
+                i++;
+
+                if (i + 1 < tokens.size() && tokens.get(i + 1).getToken() == Token.POINT && i + 2 < tokens.size() && tokens.get(i + 2).getToken() == Token.ID) {
+                    currentGroup.add(tokens.get(i + 1));
+                    currentGroup.add(tokens.get(i + 2));
+                    i += 2;
+
+                    if (currentGroup.size() == 5) {
+                        result.add(new ArrayList<>(currentGroup));
+                        currentGroup.clear();
+                        currentGroup.add(curShapeToken);
+                    }
                 }
-            } else {
+            }
+            else {
                 currentGroup.add(token);
             }
         }
-
-
-
         return result;
     }
+
+
 
 }
