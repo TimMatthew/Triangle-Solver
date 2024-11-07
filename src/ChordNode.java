@@ -21,7 +21,16 @@ public class ChordNode extends Node{
 
         if(n instanceof IDNode in) setIdNode(in);
         else if (n instanceof CircleNode cn) setAdjacentCircle(cn);
-        else if (n instanceof PointNode pn) setStart(pn);
+        else if (n instanceof PointNode pn) {
+
+            String pointID = pn.getIdNode().getValue();
+            if(pointID.equals(idNode.getValue().substring(0,0))){
+                setStart(pn);
+            }
+            else if(pointID.equals(idNode.getValue().substring(1,1))){
+                setEnd(pn);
+            }
+        }
     }
 
     public IDNode getIdNode() {

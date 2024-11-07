@@ -1,22 +1,50 @@
-public class PointNode implements CommandNode{
-    private final String pointID;
-    private final int x;
-    private final int y;
+import java.util.ArrayList;
 
-    public PointNode(String pointID, int x, int y) {
-        this.pointID = pointID;
-        this.x = x;
-        this.y = y;
+public class PointNode extends Node{
+
+    private IDNode id;
+    private IntNode x;
+    private IntNode y;
+
+    public PointNode(int childrenAmount) {
+        super(childrenAmount);
+        children = new ArrayList<>();
     }
 
-    public String getPointID() { return pointID; }
-    public int getX() { return x; }
-    public int getY() { return y; }
+    void addChild(Node n){
 
+        children.add(n);
 
-    // Після синтаксичного розбору створення малюнку
-    @Override
-    public String getId() {
-        return pointID;
+        if(n instanceof IDNode) setId((IDNode) n);
+        else if(n instanceof IntNode intNode) {
+
+            if(children.indexOf(intNode) == 1) setX(intNode);
+            else if(children.indexOf(intNode) == 2) setY(intNode);
+        }
+
+    };
+
+    public IDNode getIdNode() {
+        return id;
+    }
+
+    public IntNode getX() {
+        return x;
+    }
+
+    public IntNode getY() {
+        return y;
+    }
+
+    public void setId(IDNode id){
+        this.id = id;
+    };
+
+    public void setX(IntNode x) {
+        this.x = x;
+    }
+
+    public void setY(IntNode y) {
+        this.y = y;
     }
 }
