@@ -9,46 +9,33 @@ public class GraphicWindow extends JPanel {
     private static final int VALUE_STEP = 5;
     private static final int WINDOW_SIZE = 800;
 
-    private List<CommandNode> syntaxTree;
-    List<CommandNode> idTable = new ArrayList<>();
+    private List<Node> syntaxTree;
+
 
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
         drawCartesianGrid(g);
         if (syntaxTree != null) {
-            //executeCommands(g);
+            executeCommands(g);
         }
     }
 
-    public void setSyntaxTree(List<CommandNode> syntaxTree) {
+    public void setSyntaxTree(List<Node> syntaxTree) {
         this.syntaxTree = syntaxTree;
     }
 
-    public void setIdTable(List<CommandNode> idTable) {
-        this.idTable = idTable;
-    }
 
     private void drawPoint(Graphics g, int x, int y, String id) {
         int coordX = getWidth() / 2 + x * STEP_SIZE;
         int coordY = getHeight() / 2 - y * STEP_SIZE;
         g.setColor(Color.BLACK);
-        g.fillOval(coordX - 5, coordY - 5, 10, 10);   
+        g.fillOval(coordX - 5, coordY - 5, 10, 10);
         g.setFont(new Font("Arial Black", Font.PLAIN, 14));
-        g.drawString(id, coordX + 5, coordY - 5);   
+        g.drawString(id, coordX + 5, coordY - 5);
     }
 
     private void drawCircle(Graphics g, int x, int y, int radius, PointNode node){
-
-        // Case: коло вказане з центром і координатами
-        for(CommandNode n : idTable){
-            if(n instanceof PointNode){
-                if(!((PointNode) n).getPointID().equals(node.getId())){
-                    drawPoint(g, node.getX(), node.getY(), node.getId());
-                }
-            }
-        }
-
 
         int coordX = getWidth() / 2 + x * STEP_SIZE;
         int coordY = getHeight() / 2 - y * STEP_SIZE;
@@ -128,88 +115,24 @@ public class GraphicWindow extends JPanel {
         }
     }
 
-//    public void executeCommands(Graphics g) {
+    public void executeCommands(Graphics g) {
+
+        for (Node node : syntaxTree) {
+
+            if(node instanceof PointNode pn){
+
+                IDNode id = (IDNode) pn.getChildren().get(0);
+                IntNode  x = (IntNode) pn.getChildren().get(1);
+                IntNode y = (IntNode) pn.getChildren().get(2);
+
+                drawPoint(g, x.getValue(), y.getValue(), id.getValue());
+            }
+
+//            else (node instanceof CircleNode cn){
 //
-//        for (CommandNode node : syntaxTree) {
-//
-//            if (node instanceof PointNode markPoint)
-//                drawPoint(g, markPoint.getX(), markPoint.getY(), markPoint.getPointID());
-//
-//            else if (node instanceof CircleNode circleNode) {
-//
-//                if (circleNode.getCenterNode() == null) {
-//
-//                    for (CommandNode id : idTable) {
-//                        if (id instanceof PointNode) {
-//                            String identifier = id.getId();
-//
-//                            if (circleNode.getId().equals(identifier)) {
-//                                circleNode.setCenterNode((PointNode) id);
-//                                drawCircle(g, circleNode.getCenterNode().getX(), circleNode.getCenterNode().getY(), circleNode.getRadius(), circleNode.getCenterNode());
-//                            }
-//                        }
-//                    }
-//                }
-//                else drawCircle(g, circleNode.getCenterNode().getX(), circleNode.getCenterNode().getY(), circleNode.getRadius(), circleNode.getCenterNode());
 //            }
-//            else if (node instanceof DrawChordNode chordNode) {
-//
-//                for (CommandNode id : idTable) {
-//
-//                    if (id instanceof PointNode) {
-//                        String identifier = id.getId();
-//
-//                        if (chordNode.getStart().equals(identifier)) chordNode.setStartNode((PointNode) id);
-//                        else if (chordNode.getEnd().equals(identifier))
-//                            chordNode.setEndNode((PointNode) id);
-//
-//                        if (chordNode.getStartNode() != null && chordNode.getEndNode() != null)
-//                            drawChord(g, chordNode.getStartNode().getX(), chordNode.getStartNode().getY(), chordNode.getEndNode().getX(), chordNode.getEndNode().getY());
-//                    }
-//                }
-//            }
-//            else if (node instanceof DrawSegmentNode segmentNode) {
-//
-//                for (CommandNode id : idTable) {
-//
-//                    if (id instanceof PointNode) {
-//                        String identifier = id.getId();
-//
-//                        if (segmentNode.getStart().equals(identifier)) segmentNode.setStartNode((PointNode) id);
-//                        else if (segmentNode.getEnd().equals(identifier)) segmentNode.setEndNode((PointNode) id);
-//                    }
-//                    else if (id instanceof CircleNode circleNode) {
-//
-//                        String circleId = circleNode.getId();
-//
-//                        if (segmentNode.getStart().equals(circleId)) segmentNode.setStartNode(((CircleNode) id).getCenterNode());
-//                        else if (segmentNode.getEnd().equals(circleId)) segmentNode.setEndNode(((CircleNode) id).getCenterNode());
-//
-//                    }
-//
-//                    if (segmentNode.getStartNode() != null && segmentNode.getEndNode() != null)
-//                        drawSegment(g, segmentNode.getStartNode().getX(), segmentNode.getStartNode().getY(), segmentNode.getEndNode().getX(), segmentNode.getEndNode().getY());
-//
-//                }
-//            }
-//            else if (node instanceof RadiusNode radiusNode) {
-//                String radiusCenterID = radiusNode.getCenter();
-//                String radiusEndID = radiusNode.getEnd();
-//
-//                for (CommandNode commandNode : idTable) {
-//
-//                    if (commandNode instanceof PointNode && ((PointNode) commandNode).getPointID().equals(radiusCenterID))
-//                        radiusNode.setCenterNode((PointNode) commandNode);
-//
-//                    else if (commandNode instanceof PointNode && ((PointNode) commandNode).getPointID().equals(radiusEndID))
-//                        radiusNode.setEndNode((PointNode) commandNode);
-//
-//                    if (radiusNode.getCenterNode() != null && radiusNode.getEndNode() != null)
-//                        drawRadius(g, radiusNode.getCenterNode().getX(), radiusNode.getCenterNode().getY(), radiusNode.getEndNode().getX(), radiusNode.getEndNode().getY());
-//                }
-//            }
-//        }
-//    }
+        }
+    }
 
 
     public static GraphicWindow createAndShowGUI() {

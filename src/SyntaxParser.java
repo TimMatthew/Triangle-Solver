@@ -1,15 +1,14 @@
 import java.util.List;
-
 class SyntaxParser {
 
 /*
-    S -> Sentence
+   S -> Sentence
     Sentence -> MarkPoint | DrawCircle | DrawRadius | DrawChord | . | #
     MarkPoint -> POINT ID INT INT
     DrawCircle -> CIRCLE INT (POINT ID | MarkPoint)
-    DrawRadius -> RADIUS POINT ID POINT ID CIRCLE POINT ID
+    DrawRadius -> RADIUS POINT ID POINT ID
     DrawDiameter -> DIAMETER POINT ID POINT ID CIRCLE POINT ID
-    DrawChord -> CHORD POINT ID POINT ID
+    DrawChord -> CHORD POINT ID POINT ID CIRCLE POINT ID
     DrawSegment -> SEGMENT POINT ID POINT ID
     ID -> [A-Z]
     INT -> [0-9]+
@@ -22,107 +21,34 @@ class SyntaxParser {
     }
 
 
-    public void parse(List<CommandNode> syntaxTree, List<CommandNode> idTable) {
+    public void parse(List<Node> syntaxTree){
         sortTokenLists(sentences);
 
         for (List<Pair> sentence : sentences) {
-            System.out.println(sentence);
-        }
 
+            LexicalAnalyzer.Token firstToken = sentence.getFirst().getToken();
+            int pos=0;
+            Pair curPair;
 
+            switch (firstToken){
 
-        for (List<Pair> sentence : sentences) {
-            Pair curPair = sentence.get(0);
-            int pos = 0;
-
-            switch (curPair.getToken()) {
                 case POINT -> {
-                    pos++;
-                    curPair = sentence.get(pos);
-                    expect(LexicalAnalyzer.Token.ID, curPair.getToken());
-                    String id = curPair.getValue();
-
-                    pos++;
-                    curPair = sentence.get(pos);
-                    expect(LexicalAnalyzer.Token.INTEGER, curPair.getToken());
-                    int x = Integer.parseInt(curPair.getValue());
-
-                    pos++;
-                    curPair = sentence.get(pos);
-                    expect(LexicalAnalyzer.Token.INTEGER, curPair.getToken());
-                    int y = Integer.parseInt(curPair.getValue());
-
-                    PointNode pointNode = new PointNode(id, x, y);
-                    idTable.add(pointNode);
-                    syntaxTree.add(pointNode);
+                    PointNode pn = parsePoint(sentence, pos);
+                    syntaxTree.add(pn);
+                    
                 }
 
                 case CIRCLE -> {
-                    pos++;
-                    curPair = sentence.get(pos);
-                    expect(LexicalAnalyzer.Token.INTEGER, curPair.getToken());
-                    int radius = Integer.parseInt(curPair.getValue());
+
+                    CircleNode circleNode = new CircleNode(3);
 
                     pos++;
                     curPair = sentence.get(pos);
-                    expect(LexicalAnalyzer.Token.POINT, curPair.getToken());
-                    pos++;
-                    curPair = sentence.get(pos);
-                    expect(LexicalAnalyzer.Token.ID, curPair.getToken());
-                    String center = curPair.getValue();
+                    expect(LexicalAnalyzer.Token.INT, curPair.getToken());
+                    IntNode radius = new IntNode(0, curPair.getValue());
+                    circleNode.addChild(radius);
 
-                    if (sentence.size() == 6) {
-                        pos++;
-                        curPair = sentence.get(pos);
-                        expect(LexicalAnalyzer.Token.INTEGER, curPair.getToken());
-                        int x = Integer.parseInt(curPair.getValue());
-
-                        pos++;
-                        curPair = sentence.get(pos);
-                        expect(LexicalAnalyzer.Token.INTEGER, curPair.getToken());
-                        int y = Integer.parseInt(curPair.getValue());
-
-                        PointNode centerNode = new PointNode(center, x, y);
-                        syntaxTree.add(centerNode);
-                        CircleNode circleNode = new CircleNode(radius, center);
-                        circleNode.setCenterNode(centerNode);
-                        syntaxTree.add(circleNode);
-                        idTable.add(circleNode);
-                    }
-                    else {
-                        CircleNode circleNode = new CircleNode(radius, center);
-                        syntaxTree.add(circleNode);
-                        idTable.add(circleNode);
-                    }
-                }
-
-                case RADIUS, DIAMETER, CHORD, SEGMENT -> {
-                    boolean isRadius = curPair.getToken() == LexicalAnalyzer.Token.RADIUS;
-                    boolean isDiameter = curPair.getToken() == LexicalAnalyzer.Token.DIAMETER;
-                    boolean isChord = curPair.getToken() == LexicalAnalyzer.Token.CHORD;
-
-                    pos++;
-                    curPair = sentence.get(pos);
-                    expect(LexicalAnalyzer.Token.POINT, curPair.getToken());
-
-                    pos++;
-                    curPair = sentence.get(pos);
-                    expect(LexicalAnalyzer.Token.ID, curPair.getToken());
-                    String idStart = curPair.getValue();
-
-                    pos++;
-                    curPair = sentence.get(pos);
-                    expect(LexicalAnalyzer.Token.POINT, curPair.getToken());
-
-                    pos++;
-                    curPair = sentence.get(pos);
-                    expect(LexicalAnalyzer.Token.ID, curPair.getToken());
-                    String idEnd = curPair.getValue();
-
-                    if (isRadius || isDiameter || isChord) {
-                        pos++;
-                        curPair = sentence.get(pos);
-                        expect(LexicalAnalyzer.Token.CIRCLE, curPair.getToken());
+                    if(sentence.size()==4) {
 
                         pos++;
                         curPair = sentence.get(pos);
@@ -131,31 +57,366 @@ class SyntaxParser {
                         pos++;
                         curPair = sentence.get(pos);
                         expect(LexicalAnalyzer.Token.ID, curPair.getToken());
-                        String circleId = curPair.getValue();
-//
-//                        if (isRadius) {
-//                            DrawRadiusNode radiusNode = new DrawRadiusNode(idStart + idEnd, idStart, idEnd, circleId);
-//                            syntaxTree.add(radiusNode);
-//                            idTable.add(radiusNode);
-//                        } else {
-//                            DrawDiameterNode diameterNode = new DrawDiameterNode(idStart + idEnd, idStart, idEnd, circleId);
-//                            syntaxTree.add(diameterNode);
-//                            idTable.add(diameterNode);
-//                        }
+                        IDNode id = new IDNode(0, curPair.getValue());
+
+                        for(Node n: syntaxTree){
+                            if (n instanceof PointNode pn && pn.getIdNode().getValue().equals(id.getValue())) {
+                                circleNode.addChild(pn);
+                                circleNode.addChild(id);
+                            }
+                        }
                     }
-//                    else if (isChord) {
-//                        DrawChordNode chordNode = new DrawChordNode(idStart + idEnd, idStart, idEnd);
-//                        syntaxTree.add(chordNode);
-//                        idTable.add(chordNode);
-//                    }
-//                    else {
-//                        DrawSegmentNode segmentNode = new DrawSegmentNode(idStart + idEnd, idStart, idEnd);
-//                        syntaxTree.add(segmentNode);
-//                        idTable.add(segmentNode);
-//                    }
+
+                    else if(sentence.size()==6) {
+                        PointNode pn = parsePoint(sentence, pos+1);
+                        circleNode.addChild(pn);
+                        circleNode.addChild(pn.getIdNode());
+                    }
+
+                    syntaxTree.add(circleNode);
+                    
+                }
+
+                case RADIUS -> {
+
+                    RadiusNode radiusNode = new RadiusNode(3);
+
+                    pos++;
+                    curPair = sentence.get(pos);
+                    expect(LexicalAnalyzer.Token.POINT, curPair.getToken());
+
+                    pos++;
+                    curPair = sentence.get(pos);
+                    expect(LexicalAnalyzer.Token.ID, curPair.getToken());
+                    String centerId = curPair.getValue();
+
+                    pos++;
+                    curPair = sentence.get(pos);
+                    expect(LexicalAnalyzer.Token.POINT, curPair.getToken());
+
+                    pos++;
+                    curPair = sentence.get(pos);
+                    expect(LexicalAnalyzer.Token.ID, curPair.getToken());
+                    String endId = curPair.getValue();
+
+                    radiusNode.setIdNode(new IDNode(0, centerId+endId));
+
+                    for(Node n : syntaxTree){
+
+                        if(n instanceof CircleNode cn && cn.getCircleId().getValue().equals(centerId))
+                            radiusNode.addChild(cn);
+                        else if(n instanceof PointNode pn && pn.getIdNode().getValue().equals(endId))
+                            radiusNode.addChild(pn);
+                    }
+
+                    syntaxTree.add(radiusNode);
+                    
+                }
+
+                case DIAMETER -> {
+
+                    DiameterNode diameterNode = new DiameterNode(4);
+
+                    pos++;
+                    curPair = sentence.get(pos);
+                    expect(LexicalAnalyzer.Token.POINT, curPair.getToken());
+
+                    pos++;
+                    curPair = sentence.get(pos);
+                    expect(LexicalAnalyzer.Token.ID, curPair.getToken());
+                    String startId = curPair.getValue();
+
+                    pos++;
+                    curPair = sentence.get(pos);
+                    expect(LexicalAnalyzer.Token.POINT, curPair.getToken());
+
+                    pos++;
+                    curPair = sentence.get(pos);
+                    expect(LexicalAnalyzer.Token.ID, curPair.getToken());
+                    String endId = curPair.getValue();
+
+                    diameterNode.setIdNode(new IDNode(0, startId+endId));
+
+                    pos++;
+                    curPair = sentence.get(pos);
+                    expect(LexicalAnalyzer.Token.CIRCLE, curPair.getToken());
+
+                    pos++;
+                    curPair = sentence.get(pos);
+                    expect(LexicalAnalyzer.Token.POINT, curPair.getToken());
+
+                    pos++;
+                    curPair = sentence.get(pos);
+                    expect(LexicalAnalyzer.Token.ID, curPair.getToken());
+                    String centerId = curPair.getValue();
+
+
+                    for(Node n: syntaxTree){
+
+                        if(n instanceof CircleNode cn && cn.getCircleId().getValue().equals(centerId))
+                            diameterNode.setAdjacentCircle(cn);
+
+                        if(n instanceof PointNode start && start.getIdNode().getValue().equals(startId))
+                            diameterNode.setStart(start);
+
+                        if(n instanceof PointNode end && end.getIdNode().getValue().equals(endId)) {
+                            diameterNode.setEnd(end);
+                        }
+                    }
+
+                    if(diameterNode.getEnd() == null){
+                        PointNode endPoint = new PointNode(3);
+                        endPoint.setId(new IDNode(0, endId));
+                        diameterNode.setEnd(endPoint);
+                    }
+
+                    syntaxTree.add(diameterNode);
+                    
+                }
+
+                case CHORD -> {
+
+                    ChordNode chordNode = new ChordNode(4);
+
+                    pos++;
+                    curPair = sentence.get(pos);
+                    expect(LexicalAnalyzer.Token.POINT, curPair.getToken());
+
+                    pos++;
+                    curPair = sentence.get(pos);
+                    expect(LexicalAnalyzer.Token.ID, curPair.getToken());
+                    String startId = curPair.getValue();
+
+                    pos++;
+                    curPair = sentence.get(pos);
+                    expect(LexicalAnalyzer.Token.POINT, curPair.getToken());
+
+                    pos++;
+                    curPair = sentence.get(pos);
+                    expect(LexicalAnalyzer.Token.ID, curPair.getToken());
+                    String endId = curPair.getValue();
+
+                    chordNode.setIdNode(new IDNode(0, startId+endId));
+
+                    pos++;
+                    curPair = sentence.get(pos);
+                    expect(LexicalAnalyzer.Token.CIRCLE, curPair.getToken());
+
+                    pos++;
+                    curPair = sentence.get(pos);
+                    expect(LexicalAnalyzer.Token.POINT, curPair.getToken());
+
+                    pos++;
+                    curPair = sentence.get(pos);
+                    expect(LexicalAnalyzer.Token.ID, curPair.getToken());
+                    String centerId = curPair.getValue();
+
+
+                    for(Node n: syntaxTree){
+
+                        if(n instanceof CircleNode cn && cn.getCircleId().getValue().equals(centerId))
+                            chordNode.setAdjacentCircle(cn);
+
+                        if(n instanceof PointNode start && start.getIdNode().getValue().equals(startId))
+                            chordNode.setStart(start);
+
+                        if(n instanceof PointNode end && end.getIdNode().getValue().equals(endId)) {
+                            chordNode.setEnd(end);
+                        }
+                    }
+
+                    syntaxTree.add(chordNode);
+                    
+                }
+
+                case SEGMENT -> {
+
+                    SegmentNode segmentNode = new SegmentNode(3);
+
+                    pos++;
+                    curPair = sentence.get(pos);
+                    expect(LexicalAnalyzer.Token.POINT, curPair.getToken());
+
+                    pos++;
+                    curPair = sentence.get(pos);
+                    expect(LexicalAnalyzer.Token.ID, curPair.getToken());
+                    String startId = curPair.getValue();
+
+                    pos++;
+                    curPair = sentence.get(pos);
+                    expect(LexicalAnalyzer.Token.POINT, curPair.getToken());
+
+                    pos++;
+                    curPair = sentence.get(pos);
+                    expect(LexicalAnalyzer.Token.ID, curPair.getToken());
+                    String endId = curPair.getValue();
+
+                    for(Node n: syntaxTree){
+
+                        if(n instanceof PointNode start && start.getIdNode().getValue().equals(startId))
+                            segmentNode.setStart(start);
+
+                        if(n instanceof PointNode end && end.getIdNode().getValue().equals(endId))
+                            segmentNode.setEnd(end);
+                    }
+
+                    syntaxTree.add(segmentNode);
+                    
                 }
             }
         }
+
+
+
+//        for (List<Pair> sentence : sentences) {
+//            Pair curPair = sentence.get(0);
+//            int pos = 0;
+//            switch (curPair.getToken()) {
+//                case POINT -> {
+//                    pos++;
+//                    curPair = sentence.get(pos);
+//                    expect(LexicalAnalyzer.Token.ID, curPair.getToken());
+//                    String id = curPair.getValue();
+//
+//                    pos++;
+//                    curPair = sentence.get(pos);
+//                    expect(LexicalAnalyzer.Token.INTEGER, curPair.getToken());
+//                    int x = Integer.parseInt(curPair.getValue());
+//
+//                    pos++;
+//                    curPair = sentence.get(pos);
+//                    expect(LexicalAnalyzer.Token.INTEGER, curPair.getToken());
+//                    int y = Integer.parseInt(curPair.getValue());
+//
+//                    PointNode pointNode = new PointNode(id, x, y);
+//                    
+//                    syntaxTree.add(pointNode);
+//                }
+//
+//                case CIRCLE -> {
+//                    pos++;
+//                    curPair = sentence.get(pos);
+//                    expect(LexicalAnalyzer.Token.INTEGER, curPair.getToken());
+//                    int radius = Integer.parseInt(curPair.getValue());
+//
+//                    pos++;
+//                    curPair = sentence.get(pos);
+//                    expect(LexicalAnalyzer.Token.POINT, curPair.getToken());
+//                    pos++;
+//                    curPair = sentence.get(pos);
+//                    expect(LexicalAnalyzer.Token.ID, curPair.getToken());
+//                    String center = curPair.getValue();
+//
+//                    if (sentence.size() == 6) {
+//                        pos++;
+//                        curPair = sentence.get(pos);
+//                        expect(LexicalAnalyzer.Token.INTEGER, curPair.getToken());
+//                        int x = Integer.parseInt(curPair.getValue());
+//
+//                        pos++;
+//                        curPair = sentence.get(pos);
+//                        expect(LexicalAnalyzer.Token.INTEGER, curPair.getToken());
+//                        int y = Integer.parseInt(curPair.getValue());
+//
+//                        PointNode centerNode = new PointNode(center, x, y);
+//                        syntaxTree.add(centerNode);
+//                        CircleNode circleNode = new CircleNode(radius, center);
+//                        circleNode.setCenterNode(centerNode);
+//                        syntaxTree.add(circleNode);
+//                        
+//                    }
+//                    else {
+//                        CircleNode circleNode = new CircleNode(radius, center);
+//                        syntaxTree.add(circleNode);
+//                        
+//                    }
+//                }
+//
+//                case RADIUS, DIAMETER, CHORD, SEGMENT -> {
+//                    boolean isRadius = curPair.getToken() == LexicalAnalyzer.Token.RADIUS;
+//                    boolean isDiameter = curPair.getToken() == LexicalAnalyzer.Token.DIAMETER;
+//                    boolean isChord = curPair.getToken() == LexicalAnalyzer.Token.CHORD;
+//
+//                    pos++;
+//                    curPair = sentence.get(pos);
+//                    expect(LexicalAnalyzer.Token.POINT, curPair.getToken());
+//
+//                    pos++;
+//                    curPair = sentence.get(pos);
+//                    expect(LexicalAnalyzer.Token.ID, curPair.getToken());
+//                    String idStart = curPair.getValue();
+//
+//                    pos++;
+//                    curPair = sentence.get(pos);
+//                    expect(LexicalAnalyzer.Token.POINT, curPair.getToken());
+//
+//                    pos++;
+//                    curPair = sentence.get(pos);
+//                    expect(LexicalAnalyzer.Token.ID, curPair.getToken());
+//                    String idEnd = curPair.getValue();
+//
+//                    if (isRadius || isDiameter || isChord) {
+//                        pos++;
+//                        curPair = sentence.get(pos);
+//                        expect(LexicalAnalyzer.Token.CIRCLE, curPair.getToken());
+//
+//                        pos++;
+//                        curPair = sentence.get(pos);
+//                        expect(LexicalAnalyzer.Token.POINT, curPair.getToken());
+//
+//                        pos++;
+//                        curPair = sentence.get(pos);
+//                        expect(LexicalAnalyzer.Token.ID, curPair.getToken());
+//                        String circleId = curPair.getValue();
+////
+////                        if (isRadius) {
+////                            DrawRadiusNode radiusNode = new DrawRadiusNode(idStart + idEnd, idStart, idEnd, circleId);
+////                            syntaxTree.add(radiusNode);
+////                            
+////                        } else {
+////                            DrawDiameterNode diameterNode = new DrawDiameterNode(idStart + idEnd, idStart, idEnd, circleId);
+////                            syntaxTree.add(diameterNode);
+////                            
+////                        }
+//                    }
+////                    else if (isChord) {
+////                        DrawChordNode chordNode = new DrawChordNode(idStart + idEnd, idStart, idEnd);
+////                        syntaxTree.add(chordNode);
+////                        
+////                    }
+////                    else {
+////                        DrawSegmentNode segmentNode = new DrawSegmentNode(idStart + idEnd, idStart, idEnd);
+////                        syntaxTree.add(segmentNode);
+////                        
+////                    }
+//                }
+//            }
+//        }
+    }
+
+    private PointNode parsePoint(List<Pair> sentence, int pos) {
+        PointNode pointNode = new PointNode(3);
+
+        pos++;
+        Pair curPair = sentence.get(pos);
+        expect(LexicalAnalyzer.Token.ID, curPair.getToken());
+        IDNode id = new IDNode(0, curPair.getValue());
+
+        pos++;
+        curPair = sentence.get(pos);
+        expect(LexicalAnalyzer.Token.INT, curPair.getToken());
+        IntNode x = new IntNode(0, curPair.getValue());
+
+        pos++;
+        curPair = sentence.get(pos);
+        expect(LexicalAnalyzer.Token.INT, curPair.getToken());
+        IntNode y = new IntNode(0, curPair.getValue());
+
+        pointNode.addChild(id);
+        pointNode.addChild(x);
+        pointNode.addChild(y);
+
+        return pointNode;
     }
 
     public void expect(LexicalAnalyzer.Token expected, LexicalAnalyzer.Token retrieved) {
@@ -181,13 +442,13 @@ class SyntaxParser {
         if (firstToken == LexicalAnalyzer.Token.POINT) {
             return 1;
         }
-        else if (firstToken == LexicalAnalyzer.Token.CIRCLE) {
+        else if (firstToken == LexicalAnalyzer.Token.CIRCLE ||
+        firstToken == LexicalAnalyzer.Token.SEGMENT) {
             return 2;
         }
         else if (firstToken == LexicalAnalyzer.Token.RADIUS ||
                 firstToken == LexicalAnalyzer.Token.DIAMETER ||
-                firstToken == LexicalAnalyzer.Token.CHORD ||
-                firstToken == LexicalAnalyzer.Token.SEGMENT) {
+                firstToken == LexicalAnalyzer.Token.CHORD) {
             return 3;
         }
         return -1;

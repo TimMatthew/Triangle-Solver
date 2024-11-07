@@ -1,37 +1,43 @@
-public class DiameterNode {
+import java.util.ArrayList;
 
-    String id;
-    PointNode start;
-    CircleNode adjacentCircle;
-    PointNode end;
+public class DiameterNode extends Node{
 
-    public DiameterNode(String id, PointNode start, CircleNode adjacentCircle) {
-        this.id = id;
-        this.start = start;
-        this.adjacentCircle = adjacentCircle;
+    private IDNode idNode;
+
+    private CircleNode adjacentCircle;
+
+    private PointNode start;
+
+    private PointNode end;
+
+
+    public DiameterNode(int childrenAmount) {
+        super(childrenAmount);
+        children = new ArrayList<>();
     }
 
-    public DiameterNode(String id, PointNode start, CircleNode adjacentCircle, PointNode end) {
-        this.id = id;
-        this.start = start;
-        this.adjacentCircle = adjacentCircle;
+    void addChild(Node n){
+        children.add(n);
+
+        if(n instanceof IDNode in) setIdNode(in);
+        else if (n instanceof CircleNode cn) setAdjacentCircle(cn);
+        else if (n instanceof PointNode pn) setStart(pn);
+    }
+
+    public IDNode getIdNode() {
+        return idNode;
+    }
+
+    public void setIdNode(IDNode idNode) {
+        this.idNode = idNode;
+    }
+
+    public PointNode getEnd() {
+        return end;
+    }
+
+    public void setEnd(PointNode end) {
         this.end = end;
-    }
-
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
-    }
-
-    public PointNode getStart() {
-        return start;
-    }
-
-    public void setStart(PointNode start) {
-        this.start = start;
     }
 
     public CircleNode getAdjacentCircle() {
@@ -42,11 +48,11 @@ public class DiameterNode {
         this.adjacentCircle = adjacentCircle;
     }
 
-    public PointNode getEnd() {
-        return end;
+    public PointNode getStart() {
+        return start;
     }
 
-    public void setEnd(PointNode end) {
-        this.end = end;
+    public void setStart(PointNode start) {
+        this.start = start;
     }
 }

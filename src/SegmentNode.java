@@ -1,25 +1,36 @@
-public class SegmentNode implements CommandNode{
+public class SegmentNode extends Node{
 
-    String id;
-    PointNode start;
-    PointNode end;
+    private IDNode idNode;
+    private PointNode start;
 
-    public SegmentNode(String id, PointNode start, PointNode end) {
-        this.id = id;
-        this.start = start;
-        this.end = end;
+    private PointNode end;
+
+
+    public SegmentNode(int childrenAmount) {
+        super(childrenAmount);
+    }
+
+    public IDNode getIdNode() {
+        return idNode;
+    }
+
+    public void setIdNode(IDNode idNode) {
+        this.idNode = idNode;
     }
 
     public PointNode getStart() {
         return start;
     }
 
+    public void setStart(PointNode start) {
+        this.start = start;
+    }
+
     public PointNode getEnd() {
         return end;
     }
 
-    @Override
-    public String getId() {
-        return null;
+    public void setEnd(PointNode end) {
+        this.end = end;
     }
 }

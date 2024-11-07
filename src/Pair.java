@@ -24,8 +24,8 @@ public class Pair {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        Pair pair = (Pair) o;
-        return token == pair.token && value.equals(pair.value);
+        Pair Pair = (Pair) o;
+        return token == Pair.token && value.equals(Pair.value);
     }
 
     @Override

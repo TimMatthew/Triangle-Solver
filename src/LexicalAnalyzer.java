@@ -12,7 +12,7 @@ public class LexicalAnalyzer {
         DIAMETER,
         SEGMENT,
         ID,
-        INTEGER,
+        INT,
         EXTRA
     }
 
@@ -23,8 +23,8 @@ public class LexicalAnalyzer {
     private static final Pattern RADIUS_PATTERN = Pattern.compile("[рР]адіус[аи]*");
     private static final Pattern DIAMETER_PATTERN = Pattern.compile("[дД]іаметр[иау]*");
     private static final Pattern CHORD_PATTERN = Pattern.compile("[хХ]орд[аиу]");
-    private static final Pattern INTEGER_PATTERN = Pattern.compile("-*\\d+");
-    private static final Pattern IDENTIFIER_PATTERN = Pattern.compile("[A-Z]{1,2}");
+    private static final Pattern INT_PATTERN = Pattern.compile("-*\\d+");
+    private static final Pattern ID_PATTERN = Pattern.compile("[A-Z]{1,2}");
 
     public List<List<Pair>> analyze(String text) {
         String[] sentences = text.split("\\.");
@@ -33,9 +33,9 @@ public class LexicalAnalyzer {
         for (String sentence : sentences) {
             List<Pair> tokens = tokenize(sentence.trim());
             tokens = dropExtraTokens(tokens);
-//
-//            if (tokens.size() > 5 && tokens.getFirst().getToken().toString().matches("CHORD|RADIUS|SEGMENT"))
-//                tree.addAll(splitTokenGroups(tokens)); else
+
+            if (tokens.size() > 8 && tokens.getFirst().getToken().toString().matches("CHORD|RADIUS|SEGMENT|DIAMETER"))
+                tree.addAll(splitTokenGroups(tokens)); else
              tree.add(tokens);
         }
         return tree;
@@ -65,10 +65,10 @@ public class LexicalAnalyzer {
             else if (SEGMENT_PATTERN.matcher(word).matches()) {
                 tokens.add(new Pair(Token.SEGMENT, word));
             }
-            else if (INTEGER_PATTERN.matcher(word).matches()) {
-                tokens.add(new Pair(Token.INTEGER, word));
+            else if (INT_PATTERN.matcher(word).matches()) {
+                tokens.add(new Pair(Token.INT, word));
             }
-            else if (IDENTIFIER_PATTERN.matcher(word).matches()) {
+            else if (ID_PATTERN.matcher(word).matches()) {
 
                 if (word.length() == 2) {
                     tokens.add(new Pair(Token.POINT, "точка"));
@@ -91,5 +91,65 @@ public class LexicalAnalyzer {
             if (token.getToken() != Token.EXTRA) filteredTokens.add(token);
         }
         return filteredTokens;
+    }
+
+    private List<List<Pair>> splitTokenGroups(List<Pair> tokens) {
+        List<List<Pair>> result = new ArrayList<>();
+        List<Pair> currentGroup = new ArrayList<>();
+
+        Pair curShapeToken = null;
+
+        for (int i = 0; i < tokens.size(); i++) {
+            Pair token = tokens.get(i);
+
+            // Check if the current token is a shape token (CHORD, DIAMETER, RADIUS, SEGMENT)
+            if (token.getToken() == Token.CHORD  || token.getToken() == Token.DIAMETER || token.getToken() == Token.RADIUS || token.getToken() == Token.SEGMENT) {
+
+                // If the current group has 5 tokens, add it to the result
+                if (currentGroup.size() == 5) {
+                    result.add(new ArrayList<>(currentGroup));
+                }
+
+                // Clear the current group if it's not empty and the current token is different from the shape token
+                if (!currentGroup.isEmpty() && !currentGroup.get(0).equals(token)) {
+                    currentGroup.clear();
+                }
+                currentGroup.add(token);
+                curShapeToken = token; // Update the current shape token
+
+            } else if (token.getToken() == Token.POINT && curShapeToken != null && i + 1 < tokens.size()) {
+                // Add the current point and the next ID token
+                currentGroup.add(token);
+                currentGroup.add(tokens.get(i + 1));
+                i++; // Skip to the next token
+
+                // Check for another point and an ID token
+                if (i + 1 < tokens.size() && tokens.get(i + 1).getToken() == Token.POINT &&
+                        i + 2 < tokens.size() && tokens.get(i + 2).getToken() == Token.ID) {
+
+                    // Add the next point and ID to the current group
+                    currentGroup.add(tokens.get(i + 1));
+                    currentGroup.add(tokens.get(i + 2));
+                    i += 2; // Move index forward
+
+                    // If the current group has 5 tokens, add it to the result and reset the group
+                    if (currentGroup.size() == 5) {
+                        result.add(new ArrayList<>(currentGroup));
+                        currentGroup.clear();
+                        currentGroup.add(curShapeToken); // Start a new group with the shape token
+                    }
+                }
+            } else {
+                // Add other tokens directly to the current group
+                currentGroup.add(token);
+            }
+        }
+
+        // In case there's any remaining group that hasn't been added
+        if (currentGroup.size() == 5) {
+            result.add(new ArrayList<>(currentGroup));
+        }
+
+        return result;
     }
 }

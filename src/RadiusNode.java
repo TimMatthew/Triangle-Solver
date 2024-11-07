@@ -1,21 +1,33 @@
-public class RadiusNode implements CommandNode{
+import java.util.ArrayList;
 
-    // Початкову точку нам не треба пам'ятати,
-    // бо вона є центром кола,
-    // а коло ми й так зберігаємо
-    String id;
-    CircleNode adjacentCircle;
-    PointNode end;
+public class RadiusNode extends Node{
 
-    public RadiusNode(String id, CircleNode adjacentCircle, PointNode end) {
-        this.id = id;
-        this.adjacentCircle = adjacentCircle;
-        this.end = end;
+    private IDNode idNode;
+
+    private CircleNode adjacentCircle;
+
+    private PointNode end;
+
+
+    public RadiusNode(int childrenAmount) {
+        super(childrenAmount);
+        children = new ArrayList<>();
     }
 
+    void addChild(Node n){
+        children.add(n);
 
-    public void setId(String id) {
-        this.id = id;
+        if(n instanceof IDNode in) setIdNode(in);
+        else if (n instanceof CircleNode cn) setAdjacentCircle(cn);
+        else if (n instanceof PointNode pn) setEnd(pn);
+    }
+
+    public IDNode getIdNode() {
+        return idNode;
+    }
+
+    public void setIdNode(IDNode idNode) {
+        this.idNode = idNode;
     }
 
     public CircleNode getAdjacentCircle() {
@@ -32,10 +44,5 @@ public class RadiusNode implements CommandNode{
 
     public void setEnd(PointNode end) {
         this.end = end;
-    }
-
-    @Override
-    public String getId() {
-        return id;
     }
 }

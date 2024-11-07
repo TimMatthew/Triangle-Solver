@@ -1,48 +1,50 @@
-public class CircleNode implements CommandNode {
+import java.util.ArrayList;
 
-    private String centerId;
-    private int radius;
-    private PointNode centerNode;
+public class CircleNode extends Node{
 
 
-    public int getRadius() {
+    private IDNode circleId;
+
+    private IntNode radius;
+
+    private PointNode centerPoint;
+
+    public CircleNode(int childrenAmount) {
+        super(childrenAmount);
+        children = new ArrayList<>();
+    }
+
+    void addChild(Node n){
+        children.add(n);
+
+        if(n instanceof IDNode idNode) setCircleId(idNode);
+
+        else if(n instanceof IntNode r) setRadius(r);
+
+        else if(n instanceof PointNode center) setCenter(center);
+    }
+
+    public IDNode getCircleId() {
+        return circleId;
+    }
+
+    public void setCircleId(IDNode circleId) {
+        this.circleId = circleId;
+    }
+
+    public IntNode getRadius() {
         return radius;
     }
 
-
-    public CircleNode(int radius, String center) {
-        this.radius = radius;
-        this.centerId = center;
-    }
-
-    public CircleNode(String centerId, int radius, PointNode centerNode) {
-        this.centerId = centerId;
-        this.radius = radius;
-        this.centerNode = centerNode;
-    }
-
-    public String getCenterId() {
-        return centerId;
-    }
-
-    public void setCenterId(String centerId) {
-        this.centerId = centerId;
-    }
-
-    public void setRadius(int radius) {
+    public void setRadius(IntNode radius) {
         this.radius = radius;
     }
 
-    public PointNode getCenterNode() {
-        return centerNode;
+    public PointNode getCenter() {
+        return centerPoint;
     }
 
-    @Override
-    public String getId() {
-        return centerId;
-    }
-
-    public void setCenterNode(PointNode centerNode) {
-        this.centerNode = centerNode;
+    public void setCenter(PointNode center) {
+        this.centerPoint = center;
     }
 }

@@ -1,4 +1,3 @@
-import javax.swing.*;
 import java.io.*;
 import java.util.*;
 
@@ -30,18 +29,17 @@ public class Main {
             System.out.println(sentence);
         }
         System.out.println();
+
         // Синтаксичний та семантичний аналізи
+        List<Node> syntaxTree = new ArrayList<>();
         SyntaxParser sa = new SyntaxParser(text);
+        sa.parse(syntaxTree);
 
-        List<CommandNode> syntaxTree = new ArrayList<>();
-        List<CommandNode> IDsTable = new ArrayList<>();
-        sa.parse(syntaxTree, IDsTable);
-
+        System.out.println(syntaxTree);
 
         // Виконання задач
-//        GraphicWindow window = GraphicWindow.createAndShowGUI();
-//        window.setSyntaxTree(syntaxTree);
-//        window.setIdTable(IDsTable);
+        GraphicWindow window = GraphicWindow.createAndShowGUI();
+        window.setSyntaxTree(syntaxTree);
 
     }
 }
