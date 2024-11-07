@@ -6,8 +6,6 @@ public class Main {
 
     public static void main(String[] args) {
 
-
-
         StringBuilder testConstructor = new StringBuilder();
 
         try (BufferedReader br = new BufferedReader(new FileReader("tests/test2.txt"))) {
@@ -27,11 +25,12 @@ public class Main {
         LexicalAnalyzer la = new LexicalAnalyzer();
         List<List<Pair>> text = la.analyze(task);
 
+
         for (List<Pair> sentence : text) {
             System.out.println(sentence);
         }
-
-        // Синтаксичний аналіз
+        System.out.println();
+        // Синтаксичний та семантичний аналізи
         SyntaxParser sa = new SyntaxParser(text);
 
         List<CommandNode> syntaxTree = new ArrayList<>();
@@ -40,9 +39,9 @@ public class Main {
 
 
         // Виконання задач
-        GraphicWindow window = GraphicWindow.createAndShowGUI();
-        window.setSyntaxTree(syntaxTree);
-        window.setIdTable(IDsTable);
+//        GraphicWindow window = GraphicWindow.createAndShowGUI();
+//        window.setSyntaxTree(syntaxTree);
+//        window.setIdTable(IDsTable);
 
     }
 }

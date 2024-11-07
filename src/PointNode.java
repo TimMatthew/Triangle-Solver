@@ -1,9 +1,9 @@
-class MarkPointNode implements CommandNode{
+public class PointNode implements CommandNode{
     private final String pointID;
     private final int x;
     private final int y;
 
-    public MarkPointNode(String pointID, int x, int y) {
+    public PointNode(String pointID, int x, int y) {
         this.pointID = pointID;
         this.x = x;
         this.y = y;
