@@ -60,7 +60,7 @@ public class GraphicWindow extends JPanel {
     }
 
 
-    private void drawRadius(Graphics g, int centerX, int centerY, int endX, int endY, String endId, int circleRadius){
+    private void drawRadius(Graphics g, int centerX, int centerY, int endX, int endY, int circleRadius){
 
         double length = Math.round(Math.sqrt(Math.abs(Math.pow(endX-centerX,2)+(Math.pow(endY-centerY,2)))));
         double subtract = circleRadius-length;
@@ -79,7 +79,7 @@ public class GraphicWindow extends JPanel {
         else throw new RuntimeException("Точка не належить колу!");
     }
 
-    private void drawDiameter(Graphics g, int startX, int startY, CircleNode adjacentCircle, String endId) {
+    private void drawDiameter(Graphics g, int startX, int startY, CircleNode adjacentCircle) {
 
         IntNode radius = (IntNode) adjacentCircle.getChildren().getFirst();
         PointNode center = (PointNode) adjacentCircle.getChildren().get(1);
@@ -207,7 +207,7 @@ public class GraphicWindow extends JPanel {
                 IntNode centerX = (IntNode) centerPoint.getChildren().get(1);
                 IntNode centerY = (IntNode) centerPoint.getChildren().get(2);
 
-                drawRadius(g, centerX.getValue(), centerY.getValue(), endX.getValue(), endY.getValue(), endId.getValue(), radius.getValue());
+                drawRadius(g, centerX.getValue(), centerY.getValue(), endX.getValue(), endY.getValue(), radius.getValue());
             }
 
             else if(node instanceof DiameterNode dn){
@@ -221,7 +221,7 @@ public class GraphicWindow extends JPanel {
                 IntNode startX = startPoint.getX();
                 IntNode startY = startPoint.getY();
 
-                drawDiameter(g, startX.getValue(), startY.getValue(), adjacentCircle, endID.getValue());
+                drawDiameter(g, startX.getValue(), startY.getValue(), adjacentCircle);
             }
             else if(node instanceof ChordNode cn) drawChord(g, cn);
             else if(node instanceof SegmentNode sn) drawSegment(g, sn);

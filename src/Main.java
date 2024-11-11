@@ -13,7 +13,8 @@ public class Main {
                 testConstructor.append(line).append("\n");
             }
             System.out.println("---------------TEST TASK---------------\n" + testConstructor);
-        } catch (IOException e) {
+        }
+        catch (IOException e) {
             throw new RuntimeException(e);
         }
 

@@ -2,14 +2,14 @@ import java.util.List;
 class SyntaxAnalyzer {
 
 /*
-   S -> Sentence
-    Sentence -> MarkPoint | DrawCircle | DrawRadius | DrawChord | . | #
-    MarkPoint -> POINT ID INT INT
-    DrawCircle -> CIRCLE INT (POINT ID | MarkPoint)
-    DrawRadius -> RADIUS POINT ID POINT ID
-    DrawDiameter -> DIAMETER POINT ID POINT ID CIRCLE POINT ID
-    DrawChord -> CHORD POINT ID POINT ID CIRCLE POINT ID
-    DrawSegment -> SEGMENT POINT ID POINT ID
+    S -> Sentence
+    Sentence -> PointNode | CircleNode | RadiusNode | DiameterNode | ChordNode | SegmentNode | . | #
+    PointNode -> POINT ID INT INT
+    CircleNode -> CIRCLE INT (POINT ID | PointNode)
+    RadiusNode -> RADIUS POINT ID POINT ID
+    DiameterNode -> DIAMETER POINT ID POINT ID CIRCLE POINT ID
+    ChordNode -> CHORD POINT ID POINT ID CIRCLE POINT ID
+    SegmentNode -> SEGMENT POINT ID POINT ID
     ID -> [A-Z]
     INT -> [0-9]+
 */
