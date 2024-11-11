@@ -1,6 +1,5 @@
 public class SegmentNode extends Node{
 
-    private IDNode idNode;
     private PointNode start;
 
     private PointNode end;
@@ -8,14 +7,6 @@ public class SegmentNode extends Node{
 
     public SegmentNode(int childrenAmount) {
         super(childrenAmount);
-    }
-
-    public IDNode getIdNode() {
-        return idNode;
-    }
-
-    public void setIdNode(IDNode idNode) {
-        this.idNode = idNode;
     }
 
     public PointNode getStart() {

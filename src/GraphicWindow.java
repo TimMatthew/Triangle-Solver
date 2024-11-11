@@ -79,7 +79,7 @@ public class GraphicWindow extends JPanel {
         else throw new RuntimeException("Точка не належить колу!");
     }
 
-    private void drawDiameter(Graphics g, DiameterNode dn, int startX, int startY, CircleNode adjacentCircle, String endId) {
+    private void drawDiameter(Graphics g, int startX, int startY, CircleNode adjacentCircle, String endId) {
 
         IntNode radius = (IntNode) adjacentCircle.getChildren().getFirst();
         PointNode center = (PointNode) adjacentCircle.getChildren().get(1);
@@ -95,17 +95,16 @@ public class GraphicWindow extends JPanel {
             int endX = 2 * centerX.getValue() - startX;
             int endY = 2 * centerY.getValue() - startY;
 
-            int coordStartX = getWidth() / 2 + startX * STEP_SIZE;
-            int coordStartY = getHeight() / 2 - startY * STEP_SIZE;
-            int coordEndX = getWidth() / 2 + endX * STEP_SIZE;
-            int coordEndY =  getHeight() / 2 - endY * STEP_SIZE;
+            double coordStartX = (double) getWidth() / 2 + startX * STEP_SIZE;
+            double coordStartY = (double) getHeight() / 2 - startY * STEP_SIZE;
+            double coordEndX = (double) getWidth() / 2 + endX * STEP_SIZE;
+            double coordEndY =  (double) getHeight() / 2 - endY * STEP_SIZE;
 
             Graphics2D g2d = (Graphics2D) g;
             g2d.setStroke(new BasicStroke(2.0f));
             g.setColor(Color.BLUE);
-            g.drawLine(coordStartX, coordStartY, coordEndX, coordEndY);
+            g.drawLine((int) coordStartX, (int) coordStartY, (int) coordEndX, (int) coordEndY);
         }
-
     }
 
     private void drawChord(Graphics g, ChordNode chordNode) {
@@ -138,6 +137,7 @@ public class GraphicWindow extends JPanel {
             g.setColor(Color.BLUE);
             g.drawLine(coordStartX, coordStartY, coordEndX, coordEndY);
         }
+        else System.out.println("Одна з точка не належить колу");
     }
 
     private void drawCartesianGrid(Graphics g) {
@@ -187,9 +187,6 @@ public class GraphicWindow extends JPanel {
 
                 IntNode radius = (IntNode) cn.getChildren().get(0);
                 PointNode centerPoint = (PointNode) cn.getChildren().get(1);
-//                IDNode circleId = (IDNode) cn.getChildren().get(2);
-
-//                IDNode id = (IDNode) centerPoint.getChildren().get(0);
                 IntNode x = (IntNode) centerPoint.getChildren().get(1);
                 IntNode y = (IntNode) centerPoint.getChildren().get(2);
 
@@ -224,7 +221,7 @@ public class GraphicWindow extends JPanel {
                 IntNode startX = startPoint.getX();
                 IntNode startY = startPoint.getY();
 
-                drawDiameter(g, dn, startX.getValue(), startY.getValue(), adjacentCircle, endID.getValue());
+                drawDiameter(g, startX.getValue(), startY.getValue(), adjacentCircle, endID.getValue());
             }
             else if(node instanceof ChordNode cn) drawChord(g, cn);
             else if(node instanceof SegmentNode sn) drawSegment(g, sn);

@@ -33,10 +33,6 @@ public class ChordNode extends Node{
         }
     }
 
-    public IDNode getIdNode() {
-        return idNode;
-    }
-
     public void setIdNode(IDNode idNode) {
         this.idNode = idNode;
     }

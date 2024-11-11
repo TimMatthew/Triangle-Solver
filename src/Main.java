@@ -7,7 +7,7 @@ public class Main {
 
         StringBuilder testConstructor = new StringBuilder();
 
-        try (BufferedReader br = new BufferedReader(new FileReader("tests/test2.txt"))) {
+        try (BufferedReader br = new BufferedReader(new FileReader("tests/test1"))) {
             String line;
             while ((line = br.readLine()) != null) {
                 testConstructor.append(line).append("\n");
@@ -19,11 +19,9 @@ public class Main {
 
         String task = testConstructor.toString();
 
-
         // Лексичний аналіз
         LexicalAnalyzer la = new LexicalAnalyzer();
         List<List<Pair>> text = la.analyze(task);
-
 
         for (List<Pair> sentence : text) {
             System.out.println(sentence);
@@ -32,7 +30,7 @@ public class Main {
 
         // Синтаксичний та семантичний аналізи
         List<Node> syntaxTree = new ArrayList<>();
-        SyntaxParser sa = new SyntaxParser(text);
+        SyntaxAnalyzer sa = new SyntaxAnalyzer(text);
         sa.parse(syntaxTree);
 
         System.out.println(syntaxTree);

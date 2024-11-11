@@ -1,5 +1,5 @@
 import java.util.List;
-class SyntaxParser {
+class SyntaxAnalyzer {
 
 /*
    S -> Sentence
@@ -16,7 +16,7 @@ class SyntaxParser {
 
     private final List<List<Pair>> sentences;
 
-    public SyntaxParser(List<List<Pair>> sentences) {
+    public SyntaxAnalyzer(List<List<Pair>> sentences) {
         this.sentences = sentences;
     }
 
