@@ -28,6 +28,8 @@ public class Pair {
         return token == Pair.token && value.equals(Pair.value);
     }
 
+
+
     @Override
     public int hashCode() {
         return 31 * token.hashCode() + value.hashCode();

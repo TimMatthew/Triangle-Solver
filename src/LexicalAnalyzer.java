@@ -13,80 +13,110 @@ public class LexicalAnalyzer {
         SEGMENT,
         ID,
         INT,
+        ACTION,
         EXTRA
     }
 
 
-    private static final Pattern POINT_PATTERN = Pattern.compile("[тТ]очк[аиу]+");
+    private static final Pattern POINT_PATTERN = Pattern.compile("[тТ]очк[аиу]+|центр[омі]+");
     private static final Pattern CIRCLE_PATTERN = Pattern.compile("[кК]ол[оуіа]+");
     private static final Pattern SEGMENT_PATTERN = Pattern.compile("[Вв]ідріз[оки]*");
-    private static final Pattern RADIUS_PATTERN = Pattern.compile("[рР]адіус[аи]*");
+    private static final Pattern RADIUS_PATTERN = Pattern.compile("[рР]адіус[аиом]*");
     private static final Pattern DIAMETER_PATTERN = Pattern.compile("[дД]іаметр[иау]*");
     private static final Pattern CHORD_PATTERN = Pattern.compile("[хХ]орд[аиу]");
     private static final Pattern INT_PATTERN = Pattern.compile("-*\\d+");
-    private static final Pattern ID_PATTERN = Pattern.compile("[A-Z]{1,2}");
+    private static final Pattern ID_PATTERN = Pattern.compile("[A-Z](\\d+)?([A-Z](\\d+)?)?");
+    private static final Pattern ACTION_PATTERN = Pattern.compile("Познач(те|ити)*|Прове(сти|діть|ди)|Побуду(вати|й|йте)");
 
-    public List<List<Pair>> analyze(String text) {
-        String[] sentences = text.split("\\.");
-        List<List<Pair>> tree = new ArrayList<>();
+    public List<Pair> analyze(String text) {
+        List<Pair> tree = new ArrayList<>();
+        return tokenize(text, tree);
+    }
 
-        for (String sentence : sentences) {
-            List<Pair> tokens = tokenize(sentence.trim());
-            tokens = dropExtraTokens(tokens);
-                tree.add(tokens);
+    private List<Pair> tokenize(String sentence, List<Pair> tree) {
+        StringBuilder word = new StringBuilder();
+        char[] charArray = sentence.toCharArray();
+        boolean isHashPending = false;  
+
+        for (char c : charArray) {
+            
+            if (Character.isWhitespace(c) || c == '#' || c == '(' || c == ')' || c == ';' || c == ',' || c == '.' || c == ':') {
+                if (!word.isEmpty()) {
+                    processWord(word.toString(), tree);  
+                    word.setLength(0);
+                }
+
+                if (c == '#') isHashPending = true;
+                else if (!Character.isWhitespace(c)) tree.add(new Pair(Token.EXTRA, String.valueOf(c)));
+            }
+            else word.append(c);
+
+            if (isHashPending) {
+                tree.add(new Pair(Token.EXTRA, "#"));
+                isHashPending = false;  
+            }
         }
+
+        
+        if (!word.isEmpty()) processWord(word.toString(), tree);
+
         return tree;
     }
 
-    private List<Pair> tokenize(String sentence) {
-        List<Pair> tokens = new ArrayList<>();
-        String[] words = sentence.split("\\s+|(?=[();,])|(?<=[();,])");
 
-        for (String word : words) {
+    private void processWord(String word, List<Pair> tree) {
+        if (POINT_PATTERN.matcher(word).matches()) {
+            tree.add(new Pair(Token.POINT, word));
+        }
+        else if (CIRCLE_PATTERN.matcher(word).matches()) {
+            tree.add(new Pair(Token.CIRCLE, word));
+        }
+        else if (RADIUS_PATTERN.matcher(word).matches()) {
+            tree.add(new Pair(Token.RADIUS, word));
+        }
+        else if (DIAMETER_PATTERN.matcher(word).matches()) {
+            tree.add(new Pair(Token.DIAMETER, word));
+        }
+        else if (CHORD_PATTERN.matcher(word).matches()) {
+            tree.add(new Pair(Token.CHORD, word));
+        }
+        else if (SEGMENT_PATTERN.matcher(word).matches()) {
+            tree.add(new Pair(Token.SEGMENT, word));
+        }
+        else if (INT_PATTERN.matcher(word).matches()) {
+            tree.add(new Pair(Token.INT, word));
+        }
+        else if (ID_PATTERN.matcher(word).matches())
+        {
 
-            if (POINT_PATTERN.matcher(word).matches() || (word.matches("центр[омі]+") && tokens.stream().anyMatch(t -> t.getToken() == Token.CIRCLE))) {
-                tokens.add(new Pair(Token.POINT, word));
-            }
-            else if (CIRCLE_PATTERN.matcher(word).matches()) {
-                tokens.add(new Pair(Token.CIRCLE, word));
-            }
-            else if (RADIUS_PATTERN.matcher(word).matches()) {
-                tokens.add(new Pair(Token.RADIUS, word));
-            }
-            else if (DIAMETER_PATTERN.matcher(word).matches()) {
-                tokens.add(new Pair(Token.DIAMETER, word));
-            }
-            else if (CHORD_PATTERN.matcher(word).matches()) {
-                tokens.add(new Pair(Token.CHORD, word));
-            }
-            else if (SEGMENT_PATTERN.matcher(word).matches()) {
-                tokens.add(new Pair(Token.SEGMENT, word));
-            }
-            else if (INT_PATTERN.matcher(word).matches()) {
-                tokens.add(new Pair(Token.INT, word));
-            }
-            else if (ID_PATTERN.matcher(word).matches()) {
+            if (word.length() > 1) {
+                StringBuilder id1 = new StringBuilder(), id2 = new StringBuilder();
+                boolean isId2 = false, isId1 = true;
 
-                if (word.length() == 2) {
-                    tokens.add(new Pair(Token.POINT, "точка"));
-                    tokens.add(new Pair(Token.ID, String.valueOf(word.charAt(0))));
-                    tokens.add(new Pair(Token.POINT, "точка"));
-                    tokens.add(new Pair(Token.ID, String.valueOf(word.charAt(1))));
+                for (char c : word.toCharArray()) {
+
+                    if (Character.isLetter(c)) {
+
+                        if (!isId2 && !id1.isEmpty()) {
+                            isId2 = true;
+                            isId1 = false;
+                            id2.append(c);
+                        }
+                        else id1.append(c);
+
+                    }
+                    else if (Character.isDigit(c) && isId2) id2.append(c);
+                    else if (Character.isDigit(c) && isId1) id1.append(c);
                 }
-                else tokens.add(new Pair(Token.ID, word));
-
+                tree.add(new Pair(Token.ID, id1.toString()));
+                tree.add(new Pair(Token.ID, id2.toString()));
             }
-            else tokens.add(new Pair(Token.EXTRA, word));
+            else tree.add(new Pair(Token.ID, word));
         }
-        return tokens;
+        else if (ACTION_PATTERN.matcher(word).matches()) tree.add(new Pair(Token.ACTION, word));
+        else tree.add(new Pair(Token.EXTRA, word));
+
     }
 
-    private List<Pair> dropExtraTokens(List<Pair> tokens) {
-        List<Pair> filteredTokens = new ArrayList<>();
 
-        for (Pair token : tokens) {
-            if (token.getToken() != Token.EXTRA) filteredTokens.add(token);
-        }
-        return filteredTokens;
-    }
 }
