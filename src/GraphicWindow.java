@@ -1,5 +1,3 @@
-import org.w3c.dom.ls.LSOutput;
-
 import javax.swing.*;
 import java.awt.*;
 import java.util.ArrayList;
@@ -12,7 +10,8 @@ public class GraphicWindow extends JPanel {
     public static final int MAX_ORDINATE = 25;
     private static final int STEP_SIZE = 20;
     private static final int VALUE_STEP = 5;
-    private static final int WINDOW_SIZE = 800;
+    private static final int WINDOW_HEIGHT = 800;
+    private static final int WINDOW_WIDTH = 1200;
 
     String[] commands;
     ArrayList<Shape> idTable;
@@ -21,16 +20,11 @@ public class GraphicWindow extends JPanel {
         this.commands = commands;
     }
 
-    public ArrayList<Shape> getIdTable() {
-        return idTable;
-    }
-
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
         drawCartesianGrid(g);
         executeCommands(g, commands);
-       ;
     }
 
     public void executeCommands(Graphics g, String[] commands) {
@@ -581,7 +575,7 @@ public class GraphicWindow extends JPanel {
     }
 
     private int scaleRadius(int radius) {
-        int maxRadius = Math.min(WINDOW_SIZE / 2, MAX_ABSCISSA);
+        int maxRadius = Math.min(WINDOW_HEIGHT / 2, MAX_ABSCISSA);
         return Math.min(radius, maxRadius);
     }
     private int scaleCoordinate(int coordinate, int maxCoordinate, int windowSize) {
@@ -638,7 +632,7 @@ public class GraphicWindow extends JPanel {
 
         Graphics2D g2d = (Graphics2D) g;
         g2d.setStroke(new BasicStroke(2.0f));
-        g.setColor(Color.BLUE);
+        g.setColor(Color.BLACK);
         g.drawLine(coordStartX, coordStartY, coordEndX, coordEndY);
     }
 
@@ -662,11 +656,11 @@ public class GraphicWindow extends JPanel {
 
             Graphics2D g2d = (Graphics2D) g;
             g2d.setStroke(new BasicStroke(2.0f));
-            g.setColor(Color.BLUE);
+            g.setColor(Color.BLACK);
             g.drawLine(coordStartX, coordStartY, coordEndX, coordEndY);
             return true;
         }
-        else System.out.println("Точка "+r.getCenter().getId()+" або "+r.getEnd().getId()+" не належать колу");
+        else System.out.println("Точка "+r.getCenter().getId()+" або "+r.getEnd().getId()+" не належать колу " + r.getAdjacentCircle().getId());
         return false;
     }
 
@@ -695,11 +689,11 @@ public class GraphicWindow extends JPanel {
 
             Graphics2D g2d = (Graphics2D) g;
             g2d.setStroke(new BasicStroke(2.0f));
-            g.setColor(Color.BLUE);
+            g.setColor(Color.BLACK);
             g.drawLine((int) coordStartX, (int) coordStartY, (int) coordEndX, (int) coordEndY);
             return true;
         }
-        else System.out.println("Точка "+diameter.getStart().getId()+" або "+diameter.getEnd().getId()+" не належать колу");
+        else System.out.println("Точка "+diameter.getStart().getId()+" або "+diameter.getEnd().getId()+" не належать колу " + diameter.getAdjacentCircle().getId());
         return false;
     }
 
@@ -729,11 +723,11 @@ public class GraphicWindow extends JPanel {
 
             Graphics2D g2d = (Graphics2D) g;
             g2d.setStroke(new BasicStroke(2.0f));
-            g.setColor(Color.BLUE);
+            g.setColor(Color.BLACK);
             g.drawLine(coordStartX, coordStartY, coordEndX, coordEndY);
             return true;
         }
-        else System.out.println("Одна з точка не належить колу");
+        else System.out.println("Точка "+start.getId()+" або "+end.getId()+" не належить колу " + chord.getAdjacentCircle().getId());
         return false;
     }
 
@@ -771,7 +765,7 @@ public class GraphicWindow extends JPanel {
         JFrame frame = new JFrame("Planimetry executor");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         GraphicWindow panel = new GraphicWindow();
-        panel.setPreferredSize(new Dimension(WINDOW_SIZE + 400, WINDOW_SIZE));
+        panel.setPreferredSize(new Dimension(WINDOW_WIDTH, WINDOW_HEIGHT));
         frame.add(panel);
         frame.pack();
         frame.setLocationRelativeTo(null);
