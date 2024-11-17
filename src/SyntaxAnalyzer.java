@@ -209,7 +209,9 @@ class SyntaxAnalyzer {
     private AST parseCircleList() {
         AST circleListNode = new AST("CIRCLE_LIST");
         circleListNode.addChild(parseCircle());
-        if(currentPair.getToken() != LexicalAnalyzer.Token.DOT && currentPair.getToken() != LexicalAnalyzer.Token.COMMA) nextPair();
+        if(currentPair.getToken() != LexicalAnalyzer.Token.DOT
+                && currentPair.getToken() != LexicalAnalyzer.Token.COMMA
+                && currentPair.getToken() != LexicalAnalyzer.Token.TEXT_END) nextPair();
         while (expect(LexicalAnalyzer.Token.COMMA)) {
             circleListNode.addChild(parseCircle());
         }
@@ -289,7 +291,8 @@ class SyntaxAnalyzer {
         AST segmentListNode = new AST("SEGMENT_LIST");
         segmentListNode.addChild(parseSegment());
 
-        if(currentPair.getToken() != LexicalAnalyzer.Token.DOT && currentPair.getToken() != LexicalAnalyzer.Token.COMMA) nextPair();
+        if(currentPair.getToken() != LexicalAnalyzer.Token.DOT && currentPair.getToken() != LexicalAnalyzer.Token.COMMA
+                && currentPair.getToken() != LexicalAnalyzer.Token.TEXT_END) nextPair();
         while(expect(LexicalAnalyzer.Token.COMMA)){
             segmentListNode.addChild(parseSegment());
         }
@@ -317,7 +320,8 @@ class SyntaxAnalyzer {
         AST chordListNode = new AST("CHORD_LIST");
         chordListNode.addChild(parseChord());
 
-        if(currentPair.getToken() != LexicalAnalyzer.Token.DOT && currentPair.getToken() != LexicalAnalyzer.Token.COMMA) nextPair();
+        if(currentPair.getToken() != LexicalAnalyzer.Token.DOT && currentPair.getToken() != LexicalAnalyzer.Token.COMMA
+                && currentPair.getToken() != LexicalAnalyzer.Token.TEXT_END) nextPair();
         while (expect(LexicalAnalyzer.Token.COMMA)) {
             chordListNode.addChild(parseChord());
         }
@@ -355,7 +359,8 @@ class SyntaxAnalyzer {
         AST diameterListNode = new AST("DIAMETER_LIST");
         diameterListNode.addChild(parseDiameter());
 
-        if(currentPair.getToken() != LexicalAnalyzer.Token.DOT && currentPair.getToken() != LexicalAnalyzer.Token.COMMA) nextPair();
+        if(currentPair.getToken() != LexicalAnalyzer.Token.DOT && currentPair.getToken() != LexicalAnalyzer.Token.COMMA
+                && currentPair.getToken() != LexicalAnalyzer.Token.TEXT_END) nextPair();
         while (expect(LexicalAnalyzer.Token.COMMA)) {
             diameterListNode.addChild(parseDiameter());
         }

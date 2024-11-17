@@ -3,6 +3,7 @@ import org.w3c.dom.ls.LSOutput;
 import javax.swing.*;
 import java.awt.*;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Random;
 
 public class GraphicWindow extends JPanel {
@@ -569,6 +570,62 @@ public class GraphicWindow extends JPanel {
                     }
                 }
             }
+            else if(command.contains("Segment")){
+                String[] segmentParams = extractParameters(command);
+                Segment newSegment;
+                boolean exists = false;
+
+                for (Shape s : idTable) {
+                    if (s.getId().equals(segmentParams[0] + segmentParams[1])) {
+                        exists = true;
+                        break;
+                    }
+                }
+
+                if (!exists) {
+                    Point start, end;
+                    boolean startExists = false, endExists = false;
+
+                    String[] startParams = null, endParams = null;
+
+                    for (String c : commands) {
+                        if (c.contains("Point")) {
+                            String[] params = extractParameters(c);
+                            if (Arrays.asList(params).contains(segmentParams[0])){
+                                startParams = extractParameters(c);
+                                startExists=true;
+                            }
+                            if (Arrays.asList(params).contains(segmentParams[1])){
+                                endParams = extractParameters(c);
+                                endExists=true;
+                            }
+                        }
+                    }
+
+                    for (Shape s : idTable) {
+
+                        if (s instanceof Point)
+                        {
+                            if (s.getId().equals(segmentParams[0])) {
+                                start = (Point) s;
+                            }
+                            else if (s.getId().equals(segmentParams[1])) {
+                                end = (Point) s;
+                            }
+                        }
+                    }
+
+                    if(startExists && endExists){
+
+                        start = new Point(startParams[0], Integer.parseInt(startParams[1]), Integer.parseInt(startParams[2]));
+                        end = new Point(endParams[0], Integer.parseInt(endParams[1]), Integer.parseInt(endParams[2]));
+
+                        newSegment = new Segment(segmentParams[0]+segmentParams[1], start, end);
+                        drawSegment(g, newSegment);
+                        idTable.add(newSegment);
+                    }
+                }
+            }
         }
     }
 
@@ -588,7 +645,7 @@ public class GraphicWindow extends JPanel {
     }
 
     private String[] extractParameters(String command) {
-        int startIndex = command.indexOf('(') + 1; // Start after '('
+        int startIndex = command.indexOf('(') + 1;
         int endIndex = command.indexOf(')');
 
         String paramString = command.substring(startIndex, endIndex).replace(" ", "");
@@ -620,17 +677,19 @@ public class GraphicWindow extends JPanel {
         g.drawOval(coordX-coordRadius/2, coordY-coordRadius/2, coordRadius, coordRadius);
     }
 
-//    private void drawSegment(Graphics g, SegmentNode segmentNode) {
-//        int coordStartX = getWidth() / 2 + segmentNode.getStart().getX() * STEP_SIZE;
-//        int coordStartY = getHeight() / 2 - segmentNode.getStart().getY() * STEP_SIZE;
-//        int coordEndX = getWidth() / 2 + segmentNode.getEnd().getX() * STEP_SIZE;
-//        int coordEndY =  getHeight() / 2 - segmentNode.getEnd().getY() * STEP_SIZE;
-//
-//        Graphics2D g2d = (Graphics2D) g;
-//        g2d.setStroke(new BasicStroke(2.0f));
-//        g.setColor(Color.BLUE);
-//        g.drawLine(coordStartX, coordStartY, coordEndX, coordEndY);
-//    }
+    private void drawSegment(Graphics g, Segment segment) {
+
+
+        int coordStartX = getWidth() / 2 + segment.getStart().getX() * STEP_SIZE;
+        int coordStartY = getHeight() / 2 - segment.getStart().getY() * STEP_SIZE;
+        int coordEndX = getWidth() / 2 + segment.getEnd().getX() * STEP_SIZE;
+        int coordEndY =  getHeight() / 2 - segment.getEnd().getY() * STEP_SIZE;
+
+        Graphics2D g2d = (Graphics2D) g;
+        g2d.setStroke(new BasicStroke(2.0f));
+        g.setColor(Color.BLUE);
+        g.drawLine(coordStartX, coordStartY, coordEndX, coordEndY);
+    }
 
 
     private boolean drawRadius(Graphics g, Radius r){
