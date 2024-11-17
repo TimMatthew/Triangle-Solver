@@ -71,9 +71,12 @@ public class GraphicWindow extends JPanel {
                     String pointCommand = null;
 
                     for (String c : commands) {
-                        if (c.contains("Point") && c.contains(circleParams[0])) {
-                            pointCommand = c;
-                            break;
+                        if (c.contains("Point")) {
+                            String[] params = extractParameters(c);
+                            if (Arrays.asList(params).contains(circleParams[0])){
+                                pointCommand = c;
+                                break;
+                            }
                         }
                     }
 
@@ -131,15 +134,25 @@ public class GraphicWindow extends JPanel {
 
                     String[] centerParams = null, endParams = null, circleParams = null;
 
+
+
                     for(String c : commands){
-                        if (c.contains("Point") && c.contains(radiusParams[0])) {
-                            centerParams = extractParameters(c);
+                        if(c.contains("Point")){
+                            String[] params = extractParameters(c);
+
+                            if (Arrays.asList(params).contains(radiusParams[0])){
+                                centerParams = extractParameters(c);
+                            }
+                            else if(Arrays.asList(params).contains(radiusParams[1])){
+                                endParams = extractParameters(c);
+                            }
                         }
-                        else if(c.contains("Point") && c.contains(radiusParams[1])){
-                            endParams = extractParameters(c);
-                        }
-                        else if(c.contains("Circle") && c.contains(radiusParams[2])){
-                            circleParams = extractParameters(c);
+
+                        else if(c.contains("Circle")){
+                            String[] params = extractParameters(c);
+                            if(Arrays.asList(params).contains(radiusParams[2])) {
+                                circleParams = extractParameters(c);
+                            }
                         }
                     }
 
@@ -147,7 +160,7 @@ public class GraphicWindow extends JPanel {
 
                         if(s instanceof Point) {
                             if(s.getId().equals(radiusParams[0])){
-                                centerExists=true;
+                                centerExists = true;
                                 center = (Point) s;
                             }
                             else if(s.getId().equals(radiusParams[1])){
@@ -221,20 +234,42 @@ public class GraphicWindow extends JPanel {
                     Circle adjacentCircle = null;
                     boolean centerExists=false;
 
+//                    for (String c : commands) {
+//                        if (c.contains("Point")) {
+//                            String[] params = extractParameters(c);
+//                            if (Arrays.asList(params).contains(segmentParams[0])){
+//                                startParams = extractParameters(c);
+//                                startExists=true;
+//                            }
+//                            if (Arrays.asList(params).contains(segmentParams[1])){
+//                                endParams = extractParameters(c);
+//                                endExists=true;
+//                            }
+//                        }
+//                    }
+
                     String[] startParams = null, endParams = null, circleParams = null, centerParams = null;
 
                     for(String c : commands){
-                        if (c.contains("Point") && c.contains(diameterParams[0])) {
-                            startParams = extractParameters(c);
+
+                        if(c.contains("Point")){
+                            String[] params = extractParameters(c);
+
+                            if(Arrays.asList(params).contains(diameterParams[0])){
+                                startParams = extractParameters(c);
+                            }
+                            else if(Arrays.asList(params).contains(diameterParams[1])){
+                                endParams = extractParameters(c);
+                            }
+                            else if(Arrays.asList(params).contains(diameterParams[2])){
+                                centerParams = extractParameters(c);
+                            }
                         }
-                        else if(c.contains("Point") && c.contains(diameterParams[1])){
-                            endParams = extractParameters(c);
-                        }
-                        else if(c.contains("Point") && c.contains(diameterParams[2])){
-                            centerParams = extractParameters(c);
-                        }
-                        else if(c.contains("Circle") && c.contains(diameterParams[2])){
-                            circleParams = extractParameters(c);
+                        else if(c.contains("Circle")){
+
+                            String[] params = extractParameters(c);
+                            if(Arrays.asList(params).contains(diameterParams[2]))
+                                circleParams = extractParameters(c);
                         }
                     }
 
@@ -247,7 +282,7 @@ public class GraphicWindow extends JPanel {
                             else if(s.getId().equals(diameterParams[1])){
                                 end = (Point) s;
                             }
-                            else if(s.getId().equals(circleParams[0])){
+                            else if(s.getId().equals(diameterParams[2])){
                                 centerExists=true;
                                 circleCenter = (Point) s;
                             }
@@ -350,22 +385,24 @@ public class GraphicWindow extends JPanel {
 
                     String[] startParams = null, endParams = null, circleParams = null, centerParams;
 
+
                     for (String c : commands) {
-                        if (c.contains("Point") && c.contains(chordParams[0])) {
-                            startParams = extractParameters(c);
+                        if(c.contains("Point")){
+                            String[] params = extractParameters(c);
 
+                            if(Arrays.asList(params).contains(chordParams[0])){
+                                startParams = extractParameters(c);
+                            }
+                            else if(Arrays.asList(params).contains(chordParams[1])){
+                                endParams = extractParameters(c);
+                            }
+                            else if(Arrays.asList(params).contains(chordParams[2])){
+                                centerParams = extractParameters(c);
+                            }
                         }
-                        else if (c.contains("Point") && c.contains(chordParams[1])) {
-                            endParams = extractParameters(c);
-
-                        }
-                        else if(c.contains("Point") && c.contains(chordParams[2])){
-                            centerParams = extractParameters(c);
-
-                        }
-                        else if (c.contains("Circle") && c.contains(chordParams[2])) {
-                            circleParams = extractParameters(c);
-
+                        else if (c.contains("Circle")) {
+                            if(Arrays.asList(extractParameters(c)).contains(chordParams[2]))
+                                circleParams = extractParameters(c);
                         }
                     }
 
