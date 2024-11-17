@@ -32,7 +32,6 @@ public class LexicalAnalyzer {
     private static final Pattern INT_PATTERN = Pattern.compile("-*\\d+");
     private static final Pattern COMMA_PATTERN = Pattern.compile(",");
     private static final Pattern DOT_PATTER = Pattern.compile("\\.");
-    private static final Pattern TEXT_END_PATTER = Pattern.compile("#");
     private static final Pattern ID_PATTERN = Pattern.compile("[A-Z](\\d+)?([A-Z](\\d+)?)?");
     private static final Pattern ACTION_POINT_PATTERN = Pattern.compile("Познач(те|ити)*");
     private static final Pattern ACTION_LINE_PATTERN = Pattern.compile("Прове(сти|діть|ди)*");
