@@ -1,4 +1,5 @@
 import java.util.List;
+
 class SyntaxAnalyzer {
 
 /*
@@ -10,9 +11,9 @@ class SyntaxAnalyzer {
 
 
 
-<POINT_ACTION> ::= "Познач(ити|те) " "точк(у|и) "  <POINT_LIST>
+<POINT_ACTION> ::= "Познач(ити|те)" "точк(у|и)"  <POINT_LIST>
 <POINT_LIST> ::= <POINT> | <POINT> ',' <POINT_LIST>
-<POINT> ::= <ID> | <ID> "(із|з) " "координатами " <COORDINATE>
+<POINT> ::= <ID> | <ID> "(із|з)" "координатами" <COORDINATE>
 <COORDINATE> ::= '(' <INT> ';' <INT> ')'
 
     Ex.:    Познач точку A
@@ -22,9 +23,9 @@ class SyntaxAnalyzer {
 
 
 
-<CIRCLE_ACTION> ::= "Побуд(увати|йте|уй) " "кол(о|а) " "(із|з) " "центр(ом|ами) " <CIRCLE_LIST>
+<CIRCLE_ACTION> ::= "Побуд(увати|йте|уй)" "кол(о|а)" "(із|з)" "центр(ом|ами)" <CIRCLE_LIST>
 <CIRCLE_LIST> ::= <CIRCLE> | <CIRCLE> ',' <CIRCLE_LIST>
-<CIRCLE> ::=  <ID> | <ID> "з " "радіусом " <INT>
+<CIRCLE> ::=  <ID> | <ID> "з" "радіусом" <INT>
 
     Ex.:    Побудуй коло із центром O,
             Побудувати коло з центром V з радіусом 15
@@ -33,368 +34,354 @@ class SyntaxAnalyzer {
 
 
 
-<LINE_ACTION> ::= ("Прове(сти|діть|ди) ") ("хорд(а|и) " <RADIUS_LIST>        |
-                                           "діаметр(и) " <DIAMETER_LIST>     |
-                                           "радіус(и) " <CHORD_LIST>         |
-                                           "відріз(ок|ки) " <SEGMENT_LIST>   )
+<LINE_ACTION> ::= ("Прове(сти|діть|ди) ") ("хорд(а|и)" <RADIUS_LIST>        |
+                                           "діаметр(и)" <DIAMETER_LIST>     |
+                                           "радіус(и)" <CHORD_LIST>         |
+                                           "відріз(ок|ки)" <SEGMENT_LIST>   )
 
 
-<RADIUS_LIST> ::=  <RADIUS> | (<RADIUS> ',' <RADIUS_LIST>                    |
-                              <RADIUS> ',' "діаметр(и) " <DIAMETER_LIST>     |
-                              <RADIUS> ',' "хорд(а|и) " <CHORD_LIST>         |
-                              <RADIUS> ',' "відріз(ок|ки) " <SEGMENT_LIST>   )
+<RADIUS_LIST> ::=  <RADIUS> | (<RADIUS> ',' <RADIUS_LIST)
 
 <RADIUS> ::= <ID><ID>
 
 
-<DIAMETER_LIST> ::= <DIAMETER> | (<DIAMETER> ',' "радіус(и) " <RADIUS_LIST>        |
-                                  <DIAMETER> ',' <DIAMETER_LIST>                   |
-                                  <DIAMETER> ',' "хорд(а|и) " <CHORD_LIST>         |
-                                  <DIAMETER> ',' "відріз(ок|ки) " <SEGMENT_LIST>   )
+<DIAMETER_LIST> ::= <DIAMETER> | <DIAMETER> ',' <DIAMETER_LIST>
 
-<DIAMETER> ::= <ID><ID> "на " "колі " <ID>
+<DIAMETER> ::= <ID><ID> "на" "колі" <ID>
 
 
-<CHORD_LIST> ::= <CHORD> | (<CHORD> ',' "радіус(и) " <RADIUS_LIST>        |
-                            <CHORD> ',' "діаметр(и) " <DIAMETER_LIST>     |
-                            <CHORD> ',' <CHORD_LIST>                      |
-                            <CHORD> ',' "відріз(ок|ки) " <SEGMENT_LIST>   )
+<CHORD_LIST> ::= <CHORD> | <CHORD> ',' <CHORD_LIST>
 
-<CHORD> ::= <ID><ID> "на " "колі " <ID>
+<CHORD> ::= <ID><ID> "на" "колі" <ID>
 
 
-<SEGMENT_LIST> ->  <SEGMENT> | (<SEGMENT> ',' "радіус(и) " <RADIUS_LIST>    |
-                                <SEGMENT> ',' "діаметр(и) " <DIAMETER_LIST> |
-                                <SEGMENT> ',' "хорд(а|и) " <CHORD_LIST>     |
-                                <SEGMENT> ',' <SEGMENT_LIST>                )
+<SEGMENT_LIST> ->  <SEGMENT> | <SEGMENT> ',' <SEGMENT_LIST>
 
 <SEGMENT> -> <ID><ID>
 
     Ex.:    Побудуй радіус OK
             Побудуйте діаметр PK на колі O
             Побудувати хорди GH на колі O1, AF на колі O1
-            Провести відрізки DF1, AT, радіус OP
-            Проведіть діаметри FK на колі O, AL на колі O, хорди GH на колі O1, AF на колі O1, відрізки VM, VM1, радіуси O1W, O1G1
+            Провести відрізки DF1, AT
+
 */
 
-    private final List<Pair> sentences;
+    private List<Pair> tokens;
+    private int currentIndex = 0;
+    private AST sentenceListNode;
+    private Pair currentPair;
 
-    public SyntaxAnalyzer(List<Pair> sentences) {
-        this.sentences = sentences;
+    public SyntaxAnalyzer(List<Pair> tokens) {
+        this.tokens = tokens;
+        currentPair = tokens.getFirst();
+    }
+
+    private void nextPair() {
+        currentIndex++;
+        currentPair = tokens.get(currentIndex);
+    }
+
+    private boolean expect(LexicalAnalyzer.Token tokenType) {
+        Pair token = currentPair;
+        if (token != null && token.getToken().equals(tokenType)) {
+            return true;
+        }
+        return false;
+    }
+
+    public AST parse() {
+        return parseText();
+    }
+
+    // <TEXT> ::= <SENTENCE_LIST> | #
+    private AST parseText() {
+
+        AST root = new AST("TEXT");
+        if (expect(LexicalAnalyzer.Token.EXTRA) && currentPair.getValue().equals("#")) {
+            root = new AST("TEXT", "#");
+            return root;
+        }
+        root.addChild(parseSentenceList());
+        return root;
+    }
+
+    // <SENTENCE_LIST> ::= <SENTENCE> | <SENTENCE> '.' <SENTENCE_LIST>
+    private AST parseSentenceList() {
+        sentenceListNode = new AST("SENTENCE_LIST");
+        sentenceListNode.addChild(parseSentence());
+        while (expect(LexicalAnalyzer.Token.DOT)) {
+            nextPair();
+            sentenceListNode.addChild(parseSentence());
+        }
+
+        return sentenceListNode;
+    }
+
+    // <SENTENCE> ::= <POINT_ACTION> | <CIRCLE_ACTION> | <LINE_ACTION>
+    private AST parseSentence() {
+        AST node = null;
+        if (expect(LexicalAnalyzer.Token.ACTION_POINT)) {
+            node = parsePointAction();
+        }
+        else if (expect(LexicalAnalyzer.Token.ACTION_CIRCLE)) {
+            node = parseCircleAction();
+        }
+        else if (expect(LexicalAnalyzer.Token.ACTION_LINE)) {
+            node = parseLineAction();
+        }
+
+        return node;
+    }
+
+    // <POINT_ACTION> ::= "Познач(ити|те)" "точк(у|и)" <POINT_LIST>
+    private AST parsePointAction() {
+        AST pointActionNode = new AST("POINT_ACTION");
+        nextPair();
+        expect(LexicalAnalyzer.Token.POINT);
+        pointActionNode.addChild(parsePointList());
+        return pointActionNode;
+    }
+
+    // <POINT_LIST> ::= <POINT> | <POINT> ',' <POINT_LIST>
+    private AST parsePointList() {
+        AST pointListNode = new AST("POINT_LIST");
+        pointListNode.addChild(parsePoint());
+        if(currentPair.getToken() != LexicalAnalyzer.Token.DOT
+                && currentPair.getToken() != LexicalAnalyzer.Token.COMMA
+                && currentPair.getToken() != LexicalAnalyzer.Token.TEXT_END) nextPair();
+
+        while (expect(LexicalAnalyzer.Token.COMMA)) {
+            pointListNode.addChild(parsePoint());
+        }
+        return pointListNode;
+    }
+
+    // <POINT> ::= <ID> | <ID> "(із|з)" "координатами" <COORDINATE>
+    private AST parsePoint() {
+        AST pointNode = new AST("POINT");
+        nextPair();
+        expect(LexicalAnalyzer.Token.ID);
+        pointNode.addChild(new AST("ID", currentPair.getValue()));  // ID (e.g., "O")
+        nextPair();
+        if(expect(LexicalAnalyzer.Token.EXTRA)){
+                nextPair();  // "із" or "з"
+                nextPair();  // "координатами"
+                pointNode.addChild(parseCoordinate());
+        }
+        else{
+
+        }
+        return pointNode;
+    }
+
+    // <COORDINATE> ::= '(' <INT> ';' <INT> ')'
+    private AST parseCoordinate() {
+        AST coordinateNode = new AST("COORDINATE");
+        expect(LexicalAnalyzer.Token.EXTRA);
+        nextPair();
+        expect(LexicalAnalyzer.Token.INT);
+        coordinateNode.addChild(new AST("INT", currentPair.getValue()));  // first INT
+        nextPair();
+        expect(LexicalAnalyzer.Token.EXTRA);
+        nextPair();
+        expect(LexicalAnalyzer.Token.INT);
+        coordinateNode.addChild(new AST("INT", currentPair.getValue()));  // second INT
+        nextPair();
+        expect(LexicalAnalyzer.Token.EXTRA);
+        nextPair();
+        return coordinateNode;
+    }
+
+    // <CIRCLE_ACTION> ::= "Побуд(увати|йте|уй)" "кол(о|а)" "(із|з)" "центр(ом|ами)" <CIRCLE_LIST>
+    private AST parseCircleAction() {
+        AST circleActionNode = new AST("CIRCLE_ACTION");
+        nextPair();
+        expect(LexicalAnalyzer.Token.CIRCLE);
+        nextPair();
+        expect(LexicalAnalyzer.Token.EXTRA);
+        nextPair();
+        expect(LexicalAnalyzer.Token.POINT);
+        circleActionNode.addChild(parseCircleList());
+        return circleActionNode;
+    }
+
+    // <CIRCLE_LIST> ::= <CIRCLE> | <CIRCLE> ',' <CIRCLE_LIST>
+    private AST parseCircleList() {
+        AST circleListNode = new AST("CIRCLE_LIST");
+        circleListNode.addChild(parseCircle());
+        if(currentPair.getToken() != LexicalAnalyzer.Token.DOT && currentPair.getToken() != LexicalAnalyzer.Token.COMMA) nextPair();
+        while (expect(LexicalAnalyzer.Token.COMMA)) {
+            circleListNode.addChild(parseCircle());
+        }
+
+        return circleListNode;
+    }
+
+    // <CIRCLE> ::= <ID> | <ID> "з" "радіусом" <INT>
+    private AST parseCircle() {
+        AST circleNode = new AST("CIRCLE");
+        nextPair();
+        expect(LexicalAnalyzer.Token.ID);
+        circleNode.addChild(new AST("ID", currentPair.getValue()));  // ID (e.g., "O")
+        nextPair();
+        if (expect(LexicalAnalyzer.Token.EXTRA)) {
+            nextPair();
+            expect(LexicalAnalyzer.Token.RADIUS);
+            nextPair();
+            expect(LexicalAnalyzer.Token.INT);
+            if(Integer.parseInt(currentPair.getValue()) < 0)
+                currentPair.setValue(currentPair.getValue().replace("-", ""));
+            circleNode.addChild(new AST("INT", currentPair.getValue()));  // INT (e.g., radius)
+            nextPair();
+        }
+        return circleNode;
     }
 
 
-//    public void parse(List<Node> syntaxTree){
-//        sortTokenLists(sentences);
-//
-//        for (List<Pair> sentence : sentences) {
-//
-//            LexicalAnalyzer.Token firstToken = sentence.getFirst().getToken();
-//            int pos=0;
-//            Pair curPair;
-//
-//            switch (firstToken){
-//
-//                case POINT -> {
-//                    PointNode pn = parsePoint(sentence, pos);
-//                    syntaxTree.add(pn);
-//
-//                }
-//
-//                case CIRCLE -> {
-//
-//                    CircleNode circleNode = new CircleNode(3);
-//
-//                    pos++;
-//                    curPair = sentence.get(pos);
-//                    expect(LexicalAnalyzer.Token.INT, curPair.getToken());
-//                    IntNode radius = new IntNode(0, curPair.getValue());
-//                    circleNode.addChild(radius);
-//
-//                    if(sentence.size()==4) {
-//
-//                        pos++;
-//                        curPair = sentence.get(pos);
-//                        expect(LexicalAnalyzer.Token.POINT, curPair.getToken());
-//
-//                        pos++;
-//                        curPair = sentence.get(pos);
-//                        expect(LexicalAnalyzer.Token.ID, curPair.getToken());
-//                        IDNode id = new IDNode(0, curPair.getValue());
-//
-//                        for(Node n: syntaxTree){
-//                            if (n instanceof PointNode pn && pn.getIdNode().getValue().equals(id.getValue())) {
-//                                circleNode.addChild(pn);
-//                                circleNode.addChild(id);
-//                            }
-//                        }
-//                    }
-//
-//                    else if(sentence.size()==6) {
-//                        PointNode pn = parsePoint(sentence, pos+1);
-//                        circleNode.addChild(pn);
-//                        circleNode.addChild(pn.getIdNode());
-//                    }
-//
-//                    syntaxTree.add(circleNode);
-//
-//                }
-//
-//                case RADIUS -> {
-//
-//                    RadiusNode radiusNode = new RadiusNode(3);
-//
-//                    pos++;
-//                    curPair = sentence.get(pos);
-//                    expect(LexicalAnalyzer.Token.POINT, curPair.getToken());
-//
-//                    pos++;
-//                    curPair = sentence.get(pos);
-//                    expect(LexicalAnalyzer.Token.ID, curPair.getToken());
-//                    String centerId = curPair.getValue();
-//
-//                    pos++;
-//                    curPair = sentence.get(pos);
-//                    expect(LexicalAnalyzer.Token.POINT, curPair.getToken());
-//
-//                    pos++;
-//                    curPair = sentence.get(pos);
-//                    expect(LexicalAnalyzer.Token.ID, curPair.getToken());
-//                    String endId = curPair.getValue();
-//
-//                    radiusNode.setIdNode(new IDNode(0, centerId+endId));
-//
-//                    for(Node n : syntaxTree){
-//
-//                        if(n instanceof CircleNode cn && cn.getCircleId().getValue().equals(centerId))
-//                            radiusNode.addChild(cn);
-//                        else if(n instanceof PointNode pn && pn.getIdNode().getValue().equals(endId))
-//                            radiusNode.addChild(pn);
-//                    }
-//
-//                    syntaxTree.add(radiusNode);
-//
-//                }
-//
-//                case DIAMETER -> {
-//
-//                    DiameterNode diameterNode = new DiameterNode(4);
-//
-//                    pos++;
-//                    curPair = sentence.get(pos);
-//                    expect(LexicalAnalyzer.Token.POINT, curPair.getToken());
-//
-//                    pos++;
-//                    curPair = sentence.get(pos);
-//                    expect(LexicalAnalyzer.Token.ID, curPair.getToken());
-//                    String startId = curPair.getValue();
-//
-//                    pos++;
-//                    curPair = sentence.get(pos);
-//                    expect(LexicalAnalyzer.Token.POINT, curPair.getToken());
-//
-//                    pos++;
-//                    curPair = sentence.get(pos);
-//                    expect(LexicalAnalyzer.Token.ID, curPair.getToken());
-//                    String endId = curPair.getValue();
-//
-//                    diameterNode.setIdNode(new IDNode(0, startId+endId));
-//
-//                    pos++;
-//                    curPair = sentence.get(pos);
-//                    expect(LexicalAnalyzer.Token.CIRCLE, curPair.getToken());
-//
-//                    pos++;
-//                    curPair = sentence.get(pos);
-//                    expect(LexicalAnalyzer.Token.POINT, curPair.getToken());
-//
-//                    pos++;
-//                    curPair = sentence.get(pos);
-//                    expect(LexicalAnalyzer.Token.ID, curPair.getToken());
-//                    String centerId = curPair.getValue();
-//
-//
-//                    for(Node n: syntaxTree){
-//
-//                        if(n instanceof CircleNode cn && cn.getCircleId().getValue().equals(centerId))
-//                            diameterNode.addChild(cn);
-//
-//                        if(n instanceof PointNode start && start.getIdNode().getValue().equals(startId))
-//                        {
-//                            diameterNode.addChild(start);
-//                        }
-//
-//                        if(n instanceof PointNode end && end.getIdNode().getValue().equals(endId)) {
-//                            diameterNode.addChild(end);
-//                        }
-//                    }
-//
-//                    if(diameterNode.getEnd() == null){
-//                        PointNode endPoint = new PointNode(3);
-//                        endPoint.setId(new IDNode(0, endId));
-//                        diameterNode.setEnd(endPoint);
-//                    }
-//
-//                    syntaxTree.add(diameterNode);
-//
-//                }
-//
-//                case CHORD -> {
-//
-//                    ChordNode chordNode = new ChordNode(4);
-//
-//                    pos++;
-//                    curPair = sentence.get(pos);
-//                    expect(LexicalAnalyzer.Token.POINT, curPair.getToken());
-//
-//                    pos++;
-//                    curPair = sentence.get(pos);
-//                    expect(LexicalAnalyzer.Token.ID, curPair.getToken());
-//                    String startId = curPair.getValue();
-//
-//                    pos++;
-//                    curPair = sentence.get(pos);
-//                    expect(LexicalAnalyzer.Token.POINT, curPair.getToken());
-//
-//                    pos++;
-//                    curPair = sentence.get(pos);
-//                    expect(LexicalAnalyzer.Token.ID, curPair.getToken());
-//                    String endId = curPair.getValue();
-//
-//                    chordNode.setIdNode(new IDNode(0, startId+endId));
-//
-//                    pos++;
-//                    curPair = sentence.get(pos);
-//                    expect(LexicalAnalyzer.Token.CIRCLE, curPair.getToken());
-//
-//                    pos++;
-//                    curPair = sentence.get(pos);
-//                    expect(LexicalAnalyzer.Token.POINT, curPair.getToken());
-//
-//                    pos++;
-//                    curPair = sentence.get(pos);
-//                    expect(LexicalAnalyzer.Token.ID, curPair.getToken());
-//                    String centerId = curPair.getValue();
-//
-//
-//                    for(Node n: syntaxTree){
-//
-//                        if(n instanceof CircleNode cn && cn.getCircleId().getValue().equals(centerId)) {
-//                            chordNode.setAdjacentCircle(cn);
-//                            chordNode.addChild(cn);
-//                        }
-//
-//                        if(n instanceof PointNode start && start.getIdNode().getValue().equals(startId)) {
-//                            chordNode.setStart(start);
-//                            chordNode.addChild(start);
-//                        }
-//
-//                        if(n instanceof PointNode end && end.getIdNode().getValue().equals(endId)) {
-//                            chordNode.setEnd(end);
-//                            chordNode.addChild(end);
-//                        }
-//                    }
-//
-//                    syntaxTree.add(chordNode);
-//
-//                }
-//
-//                case SEGMENT -> {
-//
-//                    SegmentNode segmentNode = new SegmentNode(3);
-//
-//                    pos++;
-//                    curPair = sentence.get(pos);
-//                    expect(LexicalAnalyzer.Token.POINT, curPair.getToken());
-//
-//                    pos++;
-//                    curPair = sentence.get(pos);
-//                    expect(LexicalAnalyzer.Token.ID, curPair.getToken());
-//                    String startId = curPair.getValue();
-//
-//                    pos++;
-//                    curPair = sentence.get(pos);
-//                    expect(LexicalAnalyzer.Token.POINT, curPair.getToken());
-//
-//                    pos++;
-//                    curPair = sentence.get(pos);
-//                    expect(LexicalAnalyzer.Token.ID, curPair.getToken());
-//                    String endId = curPair.getValue();
-//
-//                    for(Node n: syntaxTree){
-//
-//                        if(n instanceof PointNode start && start.getIdNode().getValue().equals(startId))
-//                            segmentNode.setStart(start);
-//
-//                        if(n instanceof PointNode end && end.getIdNode().getValue().equals(endId))
-//                            segmentNode.setEnd(end);
-//                    }
-//
-//                    syntaxTree.add(segmentNode);
-//
-//                }
-//            }
-//        }
-//    }
-//
-//    private PointNode parsePoint(List<Pair> sentence, int pos) {
-//        PointNode pointNode = new PointNode(3);
-//
-//        pos++;
-//        Pair curPair = sentence.get(pos);
-//        expect(LexicalAnalyzer.Token.ID, curPair.getToken());
-//        IDNode id = new IDNode(0, curPair.getValue());
-//
-//        pos++;
-//        curPair = sentence.get(pos);
-//        expect(LexicalAnalyzer.Token.INT, curPair.getToken());
-//        IntNode x = new IntNode(0, curPair.getValue());
-//
-//        pos++;
-//        curPair = sentence.get(pos);
-//        expect(LexicalAnalyzer.Token.INT, curPair.getToken());
-//        IntNode y = new IntNode(0, curPair.getValue());
-//
-//        pointNode.addChild(id);
-//        pointNode.addChild(x);
-//        pointNode.addChild(y);
-//
-//        return pointNode;
-//    }
-//
-//    public void expect(LexicalAnalyzer.Token expected, LexicalAnalyzer.Token retrieved) {
-//        if (retrieved != expected) {
-//            throw new RuntimeException("Unexpected token! Expected: " + expected + " Got: " + retrieved);
-//        }
-//    }
-//
-//    public static void sortTokenLists(List<List<Pair>> tokenLists) {
-//
-//        tokenLists.sort((list1, list2) -> {
-//            int priority1 = getPriority(list1);
-//            int priority2 = getPriority(list2);
-//            return Integer.compare(priority1, priority2);
-//        });
-//    }
-//
-//
-//    public static int getPriority(List<Pair> tokenList) {
-//
-//        LexicalAnalyzer.Token firstToken = tokenList.getFirst().getToken();
-//
-//        if (firstToken == LexicalAnalyzer.Token.POINT) {
-//            return 1;
-//        }
-//        else if (firstToken == LexicalAnalyzer.Token.CIRCLE ||
-//        firstToken == LexicalAnalyzer.Token.SEGMENT) {
-//            return 2;
-//        }
-//        else if (firstToken == LexicalAnalyzer.Token.RADIUS ||
-//                firstToken == LexicalAnalyzer.Token.DIAMETER ||
-//                firstToken == LexicalAnalyzer.Token.CHORD) {
-//            return 3;
-//        }
-//        return -1;
-//    }
+//     <LINE_ACTION> ::= ("Прове(сти|діть|ди) ") ("хорд(а|и)" <CHORD_LIST> |
+//                                                       "діаметр(и)" <DIAMETER_LIST> |
+//                                                       "радіус(и)" <RADIUS_LIST> |
+//                                                       "відріз(ок|ки)" <SEGMENT_LIST>)
+    private AST parseLineAction() {
+        AST lineActionNode = new AST("LINE_ACTION");
+        nextPair();
+
+        if (expect(LexicalAnalyzer.Token.RADIUS)) lineActionNode.addChild(parseRadiusList());
+        else if (expect(LexicalAnalyzer.Token.DIAMETER)) lineActionNode.addChild(parseDiameterList());
+        else if (expect(LexicalAnalyzer.Token.CHORD)) lineActionNode.addChild(parseChordList());
+        else if (expect(LexicalAnalyzer.Token.SEGMENT)) lineActionNode.addChild(parseSegmentList());
+
+
+        return lineActionNode;
+    }
+
+
+    //  <RADIUS_LIST> ::=  <RADIUS> | <RADIUS> ',' <RADIUS_LIST>
+
+    private AST parseRadiusList() {
+        AST radiusListNode = new AST("RADIUS_LIST");
+        radiusListNode.addChild(parseRadius());
+
+        if(currentPair.getToken() != LexicalAnalyzer.Token.DOT && currentPair.getToken() != LexicalAnalyzer.Token.COMMA) nextPair();
+        while(expect(LexicalAnalyzer.Token.COMMA)){
+           radiusListNode.addChild(parseRadius());
+        }
+        return radiusListNode;
+    }
+
+    //  <RADIUS> ::= <ID><ID>
+    private AST parseRadius() {
+        AST radiusNode = new AST("RADIUS");
+        if(currentPair.getToken() != LexicalAnalyzer.Token.ID)
+            nextPair();
+        expect(LexicalAnalyzer.Token.ID);
+        radiusNode.addChild(new AST("ID", currentPair.getValue()));
+        nextPair();
+        expect(LexicalAnalyzer.Token.ID);
+        radiusNode.addChild(new AST("ID", currentPair.getValue()));
+        nextPair();
+        return radiusNode;
+    }
+
+
+/*<SEGMENT_LIST> ->  <SEGMENT> | (<SEGMENT> ',' "відріз(ок|ки)" <SEGMENT_LIST>)*/
+    private AST parseSegmentList() {
+        AST segmentListNode = new AST("SEGMENT_LIST");
+        segmentListNode.addChild(parseSegment());
+
+        if(currentPair.getToken() != LexicalAnalyzer.Token.DOT && currentPair.getToken() != LexicalAnalyzer.Token.COMMA) nextPair();
+        while(expect(LexicalAnalyzer.Token.COMMA)){
+            segmentListNode.addChild(parseSegment());
+        }
+        return segmentListNode;
+    }
+
+// <SEGMENT> -> <ID><ID>
+    private AST parseSegment() {
+        AST segmentNode = new AST("SEGMENT");
+        if(currentPair.getToken() != LexicalAnalyzer.Token.ID)
+            nextPair();
+        expect(LexicalAnalyzer.Token.ID);
+        segmentNode.addChild(new AST("ID", currentPair.getValue()));
+        nextPair();
+        expect(LexicalAnalyzer.Token.ID);
+        segmentNode.addChild(new AST("ID", currentPair.getValue()));
+        nextPair();
+        return segmentNode;
+    }
+
+
+/*<CHORD_LIST> ::= <CHORD> | <CHORD> ',' "хорд(а|и)" <CHORD_LIST>*/
+    private AST parseChordList() {
+
+        AST chordListNode = new AST("CHORD_LIST");
+        chordListNode.addChild(parseChord());
+
+        if(currentPair.getToken() != LexicalAnalyzer.Token.DOT && currentPair.getToken() != LexicalAnalyzer.Token.COMMA) nextPair();
+        while (expect(LexicalAnalyzer.Token.COMMA)) {
+            chordListNode.addChild(parseChord());
+        }
+
+        return chordListNode;
+    }
+
+//  <CHORD> ::= <ID><ID> "на" "колі" <ID>
+    private AST parseChord() {
+
+        AST chordNode = new AST("CHORD");
+        if(currentPair.getToken() != LexicalAnalyzer.Token.ID)
+            nextPair();
+        expect(LexicalAnalyzer.Token.ID);
+        chordNode.addChild(new AST("ID", currentPair.getValue()));
+        nextPair();
+        expect(LexicalAnalyzer.Token.ID);
+        chordNode.addChild(new AST("ID", currentPair.getValue()));
+        nextPair();
+        expect(LexicalAnalyzer.Token.EXTRA);
+        nextPair();
+        expect(LexicalAnalyzer.Token.EXTRA);
+        nextPair();
+        expect(LexicalAnalyzer.Token.CIRCLE);
+        chordNode.addChild(new AST("CIRCLE_ID", currentPair.getValue()));
+        nextPair();
+        return chordNode;
+    }
+
+
+/*
+<DIAMETER_LIST> ::= <DIAMETER> | (<DIAMETER> ',' "діаметр(и)" <DIAMETER_LIST>)
+*/
+    private AST parseDiameterList() {
+        AST diameterListNode = new AST("DIAMETER_LIST");
+        diameterListNode.addChild(parseDiameter());
+
+        if(currentPair.getToken() != LexicalAnalyzer.Token.DOT && currentPair.getToken() != LexicalAnalyzer.Token.COMMA) nextPair();
+        while (expect(LexicalAnalyzer.Token.COMMA)) {
+            diameterListNode.addChild(parseDiameter());
+        }
+
+        return diameterListNode;
+    }
+
+//    <DIAMETER> ::= <ID><ID> "на" "колі" <ID>
+    private AST parseDiameter() {
+
+        AST diameterNode = new AST("DIAMETER");
+        if(currentPair.getToken() != LexicalAnalyzer.Token.ID)
+            nextPair();
+        expect(LexicalAnalyzer.Token.ID);
+        diameterNode.addChild(new AST("ID", currentPair.getValue()));
+        nextPair();
+        expect(LexicalAnalyzer.Token.ID);
+        diameterNode.addChild(new AST("ID", currentPair.getValue()));
+        nextPair();
+        expect(LexicalAnalyzer.Token.EXTRA);
+        nextPair();
+        expect(LexicalAnalyzer.Token.CIRCLE);
+        nextPair();
+        diameterNode.addChild(new AST("CIRCLE_ID", currentPair.getValue()));
+        nextPair();
+        return diameterNode;
+    }
 
 }

@@ -1,6 +1,6 @@
 public class Pair {
     private final LexicalAnalyzer.Token token;
-    private final String value;
+    private String value;
 
     public Pair(LexicalAnalyzer.Token token, String value) {
         this.token = token;
@@ -13,6 +13,10 @@ public class Pair {
 
     public String getValue() {
         return value;
+    }
+
+    public void setValue(String value) {
+        this.value = value;
     }
 
     @Override

@@ -6,8 +6,8 @@ public class Main {
     public static void main(String[] args) {
 
         StringBuilder testConstructor = new StringBuilder();
-
-        try (BufferedReader br = new BufferedReader(new FileReader("tests/test2.txt"))) {
+        int i=2;
+        try (BufferedReader br = new BufferedReader(new FileReader("tests/test"+i+".txt"))) {
             String line;
             while ((line = br.readLine()) != null) {
                 testConstructor.append(line).append("\n");
@@ -22,22 +22,31 @@ public class Main {
 
         // Лексичний аналіз
         LexicalAnalyzer la = new LexicalAnalyzer();
-        List<Pair> text = la.analyze(task);
+        List<Pair> tokens = la.analyze(task);
 
-        for (Pair pair : text) {
+        for (Pair pair : tokens) {
             System.out.println(pair);
         }
 
-        // Синтаксичний та семантичний аналізи
-        List<Node> syntaxTree = new ArrayList<>();
-        SyntaxAnalyzer sa = new SyntaxAnalyzer(text);
-        //sa.parse(syntaxTree);
+        // Синтаксичний та семантичний аналіз
+        SyntaxAnalyzer sa = new SyntaxAnalyzer(tokens);
+        AST ast = sa.parse();
 
-        System.out.println(syntaxTree);
+        System.out.println(ast);
+
+
+        // Запис дерева у команди
+        ASTRecorder recorder = new ASTRecorder(ast);
+        String geomCommands = recorder.recordAST();
+
+        recorder.saveToFile("commands\\commands"+i+".txt", geomCommands);
 
         // Виконання задач
-//        GraphicWindow window = GraphicWindow.createAndShowGUI();
-//        window.setSyntaxTree(syntaxTree);
+        GraphicWindow window = GraphicWindow.createAndShowGUI();
+        window.setCommands(geomCommands.split("\n"));
+
 
     }
+
+
 }
