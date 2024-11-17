@@ -30,7 +30,7 @@ public class GraphicWindow extends JPanel {
         super.paintComponent(g);
         drawCartesianGrid(g);
         executeCommands(g, commands);
-       // System.out.println(idTable);
+       ;
     }
 
     public void executeCommands(Graphics g, String[] commands) {
@@ -104,7 +104,7 @@ public class GraphicWindow extends JPanel {
                             idTable.add(newCircle);
                         }
                     } else if (potentialCenter != null && !circleIsDrawn) {
-                        // Scale the radius and center to fit the frame
+                        
                         int scaledRadius = scaleRadius(Integer.parseInt(circleParams[1]));
                         newCircle = new Circle(circleParams[0], potentialCenter, scaledRadius);
                         drawCircle(g, newCircle);
@@ -184,6 +184,8 @@ public class GraphicWindow extends JPanel {
                             int centerY = random.nextInt(-MAX_ABSCISSA, MAX_ABSCISSA+1);
                             center = new Point(radiusParams[0], centerX, centerY);
                         }
+                        drawPoint(g, center.getX(), center.getY(), center.getId());
+                        idTable.add(center);
                     }
                     if(!endExists){
 
@@ -196,6 +198,8 @@ public class GraphicWindow extends JPanel {
                             int endY = random.nextInt(-MAX_ABSCISSA, MAX_ABSCISSA+1);
                             end = new Point(radiusParams[0], endX, endY);
                         }
+                        drawPoint(g, end.getX(), end.getY(), end.getId());
+                        idTable.add(end);
                     }
 
                     if(adjacentCircle==null){
@@ -204,10 +208,12 @@ public class GraphicWindow extends JPanel {
                             adjacentCircle = new Circle(circleParams[0], center, Integer.parseInt(circleParams[1]));
                         }
                         else{
-                            // Визначаю центром
                             int radius = (int) Math.round(Math.sqrt(Math.abs(Math.pow(end.getX()-center.getX(),2)+(Math.pow(end.getY()-center.getY(),2)))));
                             adjacentCircle = new Circle(center.getId(), center, radius);
                         }
+
+                        drawCircle(g, adjacentCircle);
+                        idTable.add(adjacentCircle);
                     }
 
                     newRadius = new Radius(radiusParams[0]+radiusParams[1], center, end, adjacentCircle);
@@ -233,20 +239,6 @@ public class GraphicWindow extends JPanel {
                     Point start = null, end = null, circleCenter=null;
                     Circle adjacentCircle = null;
                     boolean centerExists=false;
-
-//                    for (String c : commands) {
-//                        if (c.contains("Point")) {
-//                            String[] params = extractParameters(c);
-//                            if (Arrays.asList(params).contains(segmentParams[0])){
-//                                startParams = extractParameters(c);
-//                                startExists=true;
-//                            }
-//                            if (Arrays.asList(params).contains(segmentParams[1])){
-//                                endParams = extractParameters(c);
-//                                endExists=true;
-//                            }
-//                        }
-//                    }
 
                     String[] startParams = null, endParams = null, circleParams = null, centerParams = null;
 
@@ -379,11 +371,11 @@ public class GraphicWindow extends JPanel {
                 }
 
                 if (!exists) {
-                    Point start, end;
-                    Circle adjacentCircle;
+                    Point start = null, end=null;
+                    Circle adjacentCircle = null;
                     boolean startExists = false, endExists = false, circleExists = false, centerExists=false;
-
-                    String[] startParams = null, endParams = null, circleParams = null, centerParams;
+                    Random random = null;
+                    String[] startParams = null, endParams = null, circleParams = null, centerParams = null;
 
 
                     for (String c : commands) {
@@ -429,22 +421,84 @@ public class GraphicWindow extends JPanel {
                         }
                     }
 
-                    if(startExists && endExists && circleExists && centerExists){
+                    if(!startExists){
 
-                        start = new Point(startParams[0], Integer.parseInt(startParams[1]), Integer.parseInt(startParams[2]));
-                        end = new Point(endParams[0], Integer.parseInt(endParams[1]), Integer.parseInt(endParams[2]));
-                        adjacentCircle = new Circle(circleParams[0], circleCenter, Integer.parseInt(circleParams[1]));
+                        if(startParams!=null){
+                            start = new Point(startParams[0], Integer.parseInt(startParams[1]), Integer.parseInt(startParams[2]));
+                        }
+                        else{
+                            random = new Random();
 
-                        newChord = new Chord(chordParams[0]+chordParams[1], start, end, adjacentCircle);
-                        if(drawChord(g, newChord))
-                            idTable.add(newChord);
+                            int startX = random.nextInt(-MAX_ABSCISSA, MAX_ABSCISSA+1);
+                            int startY = random.nextInt(-MAX_ABSCISSA, MAX_ABSCISSA+1);
+                            start = new Point(chordParams[0], startX, startY);
+                        }
+                        drawPoint(g, start.getX(), start.getY(), start.getId());
+                        idTable.add(start);
                     }
+
+                    if(!endExists){
+
+                        if(endParams!=null){
+                            end = new Point(endParams[0], Integer.parseInt(endParams[1]), Integer.parseInt(endParams[2]));
+                        }
+                        else{
+                            random = new Random();
+
+                            int endX = random.nextInt(-MAX_ABSCISSA, MAX_ABSCISSA+1);
+                            int endY = random.nextInt(-MAX_ABSCISSA, MAX_ABSCISSA+1);
+                            end = new Point(chordParams[0], endX, endY);
+                        }
+                        drawPoint(g, end.getX(), end.getY(), end.getId());
+                        idTable.add(end);
+                    }
+
+                    if(adjacentCircle==null){
+
+                        if(circleParams!=null){
+
+                            if(centerExists){
+                                adjacentCircle = new Circle(circleParams[0], circleCenter, Integer.parseInt(circleParams[1]));
+                            }
+                            else{
+
+                                if(centerParams!=null){
+                                    circleCenter = new Point(centerParams[0], Integer.parseInt(centerParams[1]), Integer.parseInt(centerParams[2]));
+                                    adjacentCircle = new Circle(circleParams[0], circleCenter, Integer.parseInt(circleParams[1]));
+                                }
+                                else{
+                                    int centerX = random.nextInt(-MAX_ABSCISSA, MAX_ABSCISSA);
+                                    int centerY = random.nextInt(-MAX_ORDINATE, MAX_ORDINATE);
+                                    circleCenter = new Point(chordParams[2], centerX, centerY);
+                                    adjacentCircle = new Circle(chordParams[2], circleCenter, Integer.parseInt(circleParams[1]));
+                                }
+                                drawPoint(g, circleCenter.getX(), circleCenter.getY(), circleCenter.getId());
+                                idTable.add(circleCenter);
+                            }
+                        }
+                        else{
+                            int centerX = random.nextInt(-MAX_ABSCISSA, MAX_ABSCISSA);
+                            int centerY = random.nextInt(-MAX_ORDINATE, MAX_ORDINATE);
+                            int radius = (int) (Math.round(Math.sqrt(Math.abs(Math.pow(end.getX()-centerX,2)+(Math.pow(end.getY()-centerY,2)))))/2);
+
+                            circleCenter = new Point(chordParams[2], centerX, centerY);
+                            adjacentCircle = new Circle(chordParams[2], circleCenter, radius);
+                        }
+
+                        drawCircle(g, adjacentCircle);
+                        idTable.add(adjacentCircle);
+                    }
+
+                    newChord = new Chord(chordParams[0]+chordParams[1], start, end, adjacentCircle);
+                    if(drawChord(g, newChord))
+                        idTable.add(newChord);
                 }
             }
             else if(command.contains("Segment")){
                 String[] segmentParams = extractParameters(command);
                 Segment newSegment;
                 boolean exists = false;
+                Random random;
 
                 for (Shape s : idTable) {
                     if (s.getId().equals(segmentParams[0] + segmentParams[1])) {
@@ -454,7 +508,7 @@ public class GraphicWindow extends JPanel {
                 }
 
                 if (!exists) {
-                    Point start, end;
+                    Point start = null, end=null;
                     boolean startExists = false, endExists = false;
 
                     String[] startParams = null, endParams = null;
@@ -486,15 +540,41 @@ public class GraphicWindow extends JPanel {
                         }
                     }
 
-                    if(startExists && endExists){
+                    if(!startExists){
 
-                        start = new Point(startParams[0], Integer.parseInt(startParams[1]), Integer.parseInt(startParams[2]));
-                        end = new Point(endParams[0], Integer.parseInt(endParams[1]), Integer.parseInt(endParams[2]));
+                        if(startParams!=null){
+                            start = new Point(startParams[0], Integer.parseInt(startParams[1]), Integer.parseInt(startParams[2]));
+                        }
+                        else{
+                            random = new Random();
 
-                        newSegment = new Segment(segmentParams[0]+segmentParams[1], start, end);
-                        drawSegment(g, newSegment);
-                        idTable.add(newSegment);
+                            int startX = random.nextInt(-MAX_ABSCISSA, MAX_ABSCISSA+1);
+                            int startY = random.nextInt(-MAX_ABSCISSA, MAX_ABSCISSA+1);
+                            start = new Point(segmentParams[0], startX, startY);
+                        }
+                        drawPoint(g, start.getX(), start.getY(), start.getId());
+                        idTable.add(start);
                     }
+
+                    if(!endExists){
+
+                        if(endParams!=null){
+                            end = new Point(endParams[0], Integer.parseInt(endParams[1]), Integer.parseInt(endParams[2]));
+                        }
+                        else{
+                            random = new Random();
+
+                            int endX = random.nextInt(-MAX_ABSCISSA, MAX_ABSCISSA+1);
+                            int endY = random.nextInt(-MAX_ABSCISSA, MAX_ABSCISSA+1);
+                            end = new Point(segmentParams[0], endX, endY);
+                        }
+                        drawPoint(g, end.getX(), end.getY(), end.getId());
+                        idTable.add(end);
+                    }
+
+                    newSegment = new Segment(segmentParams[0]+segmentParams[1], start, end);
+                    drawSegment(g, newSegment);
+                    idTable.add(newSegment);
                 }
             }
         }
