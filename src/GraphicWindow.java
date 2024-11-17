@@ -160,131 +160,46 @@ public class GraphicWindow extends JPanel {
                         }
                     }
 
-                    boolean matched=false;
-
-                    if(center!=null && end!=null && adjacentCircle!=null){
-                        newRadius = new Radius(center.getId()+end.getId(), center, end, adjacentCircle);
-                        if(drawRadius(g, newRadius))
-                            idTable.add(newRadius);
-                    }
-
-                    else if(center==null && end==null && adjacentCircle==null){
-
-                        // Створюємо центр, кінець
-                        // Вираховуємо радіус
-                        // Створюємо коло
-                        // Створюємо радіус
-
-                        if(centerParams!=null && endParams!=null && circleParams!=null){
-                            // Беремо параметри з команд
-
-                                center = operatePoint(g, centerParams[0], Integer.parseInt(centerParams[1]), Integer.parseInt(centerParams[2]));
-                                end = operatePoint(g, endParams[0], Integer.parseInt(endParams[1]), Integer.parseInt(endParams[2]));
-                                adjacentCircle = new Circle(circleParams[0], center, Integer.parseInt(circleParams[1]));
-                                idTable.add(adjacentCircle);
-
-
-                                drawPoint(g, center.getX(), center.getY(), center.getId());
-                                drawPoint(g, end.getX(), end.getY(), end.getId());
-                                drawCircle(g, adjacentCircle);
-
-                                newRadius = new Radius(center.getId()+end.getId(), center, end, adjacentCircle);
-                                if(drawRadius(g, newRadius))
-                                    idTable.add(newRadius);
-                        }
-
-                    }
-
-                    // Якщо коло намальоване
-                    else if(adjacentCircle!=null){
-
-                        if(end == null){
-                            if (endParams!=null){
-                                // Установити параметри
-                                // Перевірити кінець на належність кола
-
-                                end = operatePoint(g, endParams[0], Integer.parseInt(endParams[1]), Integer.parseInt(endParams[2]));
-
-                                newRadius = new Radius(adjacentCircle.getCenter().getId()+end.getId(), adjacentCircle.getCenter(), end, adjacentCircle);
-                                if(drawRadius(g, newRadius))
-                                    idTable.add(newRadius);
-                            }
-                            else{
-                                // Треба генерити
-                            }
-                        }
-                        else{
-                            newRadius = new Radius(adjacentCircle.getId()+end.getId(), adjacentCircle.getCenter(), end, adjacentCircle);
-                            if(drawRadius(g, newRadius))
-                                idTable.add(newRadius);
-
-                        }
-                    }
-
-                    // Якщо кола нема
-                    // Центральна точка є, кінця нема
-                    else if(center!=null && end==null){
-
-
-                        if(endParams!=null){
-                            // Встановити параметри
-                            end = operatePoint(g, endParams[0], Integer.parseInt(endParams[1]), Integer.parseInt(endParams[2]));
-                            if(circleParams!=null) adjacentCircle = new Circle(circleParams[0], center, Integer.parseInt(circleParams[1]));
-                            else{
-                                int radius = (int) Math.round(Math.sqrt(Math.abs(Math.pow(end.getX()-center.getX(),2)+(Math.pow(end.getY()-center.getY(),2)))));
-                                adjacentCircle = new Circle(center.getId(), center, radius);
-                            }
-                            drawCircle(g, adjacentCircle);
-                            idTable.add(adjacentCircle);
-
-                            newRadius = new Radius(center.getId()+end.getId(), center, end, adjacentCircle);
-                            if(drawRadius(g, newRadius))
-                                idTable.add(newRadius);
-
-                        }
-                        else{
-                            // Треба генерити
-
-                        }
-                    }
-                    // Кінець є, центру нема
-                    else if(end!=null && center==null){
+                    if(!centerExists){
 
                         if(centerParams!=null){
-
-                            // Встановити параметри
-                            center = operatePoint(g, centerParams[0], Integer.parseInt(centerParams[1]), Integer.parseInt(centerParams[2]));
-
-                            if(circleParams!=null) adjacentCircle = new Circle(circleParams[0], center, Integer.parseInt(circleParams[1]));
-                            else{
-                                int radius = (int) Math.round(Math.sqrt(Math.abs(Math.pow(end.getX()-center.getX(),2)+(Math.pow(end.getY()-center.getY(),2)))));
-                                adjacentCircle = new Circle(center.getId(), center, radius);
-                            }
-                            drawCircle(g, adjacentCircle);
-                            idTable.add(adjacentCircle);
-
-                            newRadius = new Radius(center.getId()+end.getId(), center, end, adjacentCircle);
-                            if(drawRadius(g, newRadius))
-                                idTable.add(newRadius);
+                            center = new Point(centerParams[0], Integer.parseInt(centerParams[1]), Integer.parseInt(centerParams[2]));
                         }
                         else{
-
+                            random = new Random();
+                            int centerX = random.nextInt(-MAX_ABSCISSA, MAX_ABSCISSA+1);
+                            int centerY = random.nextInt(-MAX_ABSCISSA, MAX_ABSCISSA+1);
+                            center = new Point(radiusParams[0], centerX, centerY);
                         }
                     }
-                    else if(center != null && end != null){
+                    if(!endExists){
 
-                        if(circleParams!=null) adjacentCircle = new Circle(circleParams[0], center, Integer.parseInt(circleParams[1]));
+                        if(endParams!=null) {
+                            end = new Point(endParams[0], Integer.parseInt(endParams[1]), Integer.parseInt(endParams[2]));
+                        }
                         else{
+                            random = new Random();
+                            int endX = random.nextInt(-MAX_ABSCISSA, MAX_ABSCISSA+1);
+                            int endY = random.nextInt(-MAX_ABSCISSA, MAX_ABSCISSA+1);
+                            end = new Point(radiusParams[0], endX, endY);
+                        }
+                    }
+
+                    if(adjacentCircle==null){
+
+                        if(circleParams!=null){
+                            adjacentCircle = new Circle(circleParams[0], center, Integer.parseInt(circleParams[1]));
+                        }
+                        else{
+                            // Визначаю центром
                             int radius = (int) Math.round(Math.sqrt(Math.abs(Math.pow(end.getX()-center.getX(),2)+(Math.pow(end.getY()-center.getY(),2)))));
                             adjacentCircle = new Circle(center.getId(), center, radius);
                         }
-                        drawCircle(g, adjacentCircle);
-                        idTable.add(adjacentCircle);
-
-                        newRadius = new Radius(center.getId()+end.getId(), center, end, adjacentCircle);
-                        if(drawRadius(g, newRadius))
-                            idTable.add(newRadius);
                     }
+
+                    newRadius = new Radius(radiusParams[0]+radiusParams[1], center, end, adjacentCircle);
+                    if(drawRadius(g, newRadius))
+                        idTable.add(newRadius);
                 }
             }
             else if(command.contains("Diameter")){
@@ -292,6 +207,7 @@ public class GraphicWindow extends JPanel {
                 String[] diameterParams = extractParameters(command);
                 Diameter newDiameter;
                 boolean exists=false;
+                Random random;
 
                 for(Shape s : idTable){
                     if(s.getId().equals(diameterParams[0]+diameterParams[1])){
@@ -305,7 +221,7 @@ public class GraphicWindow extends JPanel {
                     Circle adjacentCircle = null;
                     boolean centerExists=false;
 
-                    String[] startParams = null, endParams = null, circleParams = null;
+                    String[] startParams = null, endParams = null, circleParams = null, centerParams = null;
 
                     for(String c : commands){
                         if (c.contains("Point") && c.contains(diameterParams[0])) {
@@ -315,6 +231,7 @@ public class GraphicWindow extends JPanel {
                             endParams = extractParameters(c);
                         }
                         else if(c.contains("Point") && c.contains(diameterParams[2])){
+                            centerParams = extractParameters(c);
                         }
                         else if(c.contains("Circle") && c.contains(diameterParams[2])){
                             circleParams = extractParameters(c);
@@ -340,164 +257,76 @@ public class GraphicWindow extends JPanel {
                         }
                     }
 
-                    if(start!=null && end!=null && adjacentCircle!=null){
-                        newDiameter = new Diameter(start.getId()+end.getId(), start, end, adjacentCircle);
-                        if(drawDiameter(g, newDiameter))
-                            idTable.add(newDiameter);
-                    }
-
-                    else if(start==null && end==null && adjacentCircle==null){
-
-                        // Створюємо центр, кінець
-                        // Вираховуємо радіус
-                        // Створюємо коло
-                        // Створюємо радіус
-
-                        if(startParams!=null && endParams!=null && circleParams!=null){
-                            // Беремо параметри з команд
-
-                            start = operatePoint(g, startParams[0], Integer.parseInt(startParams[1]), Integer.parseInt(startParams[2]));
-                            end = operatePoint(g, endParams[0], Integer.parseInt(endParams[1]), Integer.parseInt(endParams[2]));
-
-                            int centerX = (start.getX()+end.getX())/2;
-                            int centerY = (start.getY()+end.getY())/2;
-
-                            circleCenter = operatePoint(g, diameterParams[2], centerX, centerY);
-                            int radius = (int) Math.round(Math.sqrt(Math.abs(Math.pow(end.getX()-start.getX(),2)+(Math.pow(end.getY()-start.getY(),2)))))/2;
-                            adjacentCircle = new Circle(circleCenter.getId(), circleCenter, radius);
-                            idTable.add(adjacentCircle);
-
-
-                            drawPoint(g, start.getX(), start.getY(), start.getId());
-                            drawPoint(g, end.getX(), end.getY(), end.getId());
-                            drawCircle(g, adjacentCircle);
-
-                            newDiameter = new Diameter(start.getId()+end.getId(), start, end, adjacentCircle);
-                            if(drawDiameter(g, newDiameter))
-                                idTable.add(newDiameter);
-                        }
-                        else if(startParams==null) System.out.println("Точка "+diameterParams[0]+" не має координат");
-                        else if(endParams==null) System.out.println("Точка "+diameterParams[1]+" не має координат");
-                        else if(circleParams==null){
-                            // Побудувати коло за центром вектора початку й кінця
-                            // Радіус буде довжина між початком/кінцем та центром
-                            // Тоді діаметр буде можливий
-                        }
-                    }
-
-                    // Якщо коло намальоване
-                    else if(adjacentCircle!=null){
-
-                        if(start!=null){
-
-                            start = operatePoint(g, startParams[0], Integer.parseInt(startParams[1]), Integer.parseInt(startParams[2]));
-
-                            int endX, endY;
-                            endX = 2 * adjacentCircle.getCenter().getX() - start.getX();
-                            endY = 2 * adjacentCircle.getCenter().getY()- start.getY();
-                            end = operatePoint(g, diameterParams[0], endX, endY);
-
-                            newDiameter = new Diameter(start.getId()+end.getId(), start, end, adjacentCircle);
-                            if(drawDiameter(g, newDiameter))
-                                idTable.add(newDiameter);
-
-                        }
-                        else if(end != null){
-
-                            end = operatePoint(g, endParams[0], Integer.parseInt(endParams[1]), Integer.parseInt(endParams[2]));
-
-                            int startX = 2 * adjacentCircle.getCenter().getX()- end.getX();
-                            int startY = 2 * adjacentCircle.getCenter().getY()- end.getY();
-                            start = operatePoint(g, diameterParams[0], startX, startY);
-
-                            newDiameter = new Diameter(start.getId()+end.getId(), start, end, adjacentCircle);
-                            if(drawDiameter(g, newDiameter))
-                                idTable.add(newDiameter);
-                        }
-                        else {
-                            System.out.println("Точка "+diameterParams[0]+" та "+ diameterParams[1]+" не мають координат");
-                        }
-                    }
-
-                // Якщо кола нема
-                    // Початок є, кінця нема
-                    else if(start!=null && end==null){
-
-                        if(endParams!=null){
-                            // Встановити параметри
-                            end = operatePoint(g, endParams[0], Integer.parseInt(endParams[1]), Integer.parseInt(endParams[2]));
-
-                            int centerX = (start.getX()+end.getX())/2;
-                            int centerY = (start.getY()+end.getY())/2;
-
-                            circleCenter = operatePoint(g, diameterParams[2], centerX, centerY);
-                            int radius = (int) Math.round(Math.sqrt(Math.abs(Math.pow(end.getX()-start.getX(),2)+(Math.pow(end.getY()-start.getY(),2)))))/2;
-                            adjacentCircle = new Circle(circleCenter.getId(), circleCenter, radius);
-                            drawCircle(g, adjacentCircle);
-                            idTable.add(adjacentCircle);
-
-                            newDiameter = new Diameter(start.getId()+end.getId(), start, end, adjacentCircle);
-                            if(drawDiameter(g, newDiameter))
-                                idTable.add(newDiameter);
-
-                        }
-                        else{
-                            System.out.println("Точка "+diameterParams[1]+" не має координат");
-                        }
-                    }
-                    // Кінець є, початку нема
-                    else if(start == null){
+                    if(start==null){
 
                         if(startParams!=null){
-
-                            // Встановити параметри
-                            start = operatePoint(g, startParams[0], Integer.parseInt(startParams[1]), Integer.parseInt(startParams[2]));
-
-                            int centerX = (start.getX()+end.getX())/2;
-                            int centerY = (start.getY()+end.getY())/2;
-
-                            circleCenter = operatePoint(g, diameterParams[2], centerX, centerY);
-                            int radius = (int) Math.round(Math.sqrt(Math.abs(Math.pow(end.getX()-start.getX(),2)+(Math.pow(end.getY()-start.getY(),2)))))/2;
-                            adjacentCircle = new Circle(start.getId(), circleCenter, radius);
-                            drawCircle(g, adjacentCircle);
-                            idTable.add(adjacentCircle);
-
-                            newDiameter = new Diameter(start.getId()+end.getId(), start, end, adjacentCircle);
-                            if(drawDiameter(g, newDiameter))
-                                idTable.add(newDiameter);
+                            start = new Point(startParams[0], Integer.parseInt(startParams[1]), Integer.parseInt(startParams[2]));
                         }
-                        else System.out.println("Точка "+diameterParams[0]+" не має координат");
+                        else{
+                            random = new Random();
 
+                            int startX = random.nextInt(-MAX_ABSCISSA, MAX_ABSCISSA+1);
+                            int startY = random.nextInt(-MAX_ABSCISSA, MAX_ABSCISSA+1);
+                            start = new Point(diameterParams[0], startX, startY);
+                        }
+                        drawPoint(g, start.getX(), start.getY(), start.getId());
+                        idTable.add(start);
                     }
-                    else {
 
-                        if(centerExists){
+                    if(end==null){
 
-                            int radius = (int) Math.round(Math.sqrt(Math.abs(Math.pow(end.getX()-start.getX(),2)+(Math.pow(end.getY()-start.getY(),2)))))/2;
-                            adjacentCircle = new Circle(diameterParams[2], circleCenter, radius);
-                            drawCircle(g, adjacentCircle);
-                            idTable.add(adjacentCircle);
+                        if(endParams!=null){
+                            end = new Point(endParams[0], Integer.parseInt(endParams[1]), Integer.parseInt(endParams[2]));
+                        }
+                        else{
+                            random = new Random();
+                            int endX = random.nextInt(-MAX_ABSCISSA, MAX_ABSCISSA+1);
+                            int endY = random.nextInt(-MAX_ABSCISSA, MAX_ABSCISSA+1);
+                            end = new Point(diameterParams[1], endX, endY);
+                        }
+                        drawPoint(g, end.getX(), end.getY(), end.getId());
+                        idTable.add(end);
+                    }
 
-                            newDiameter = new Diameter(start.getId()+end.getId(), start, end, adjacentCircle);
-                            if(drawDiameter(g, newDiameter))
-                                idTable.add(newDiameter);
+                    if (adjacentCircle==null){
+
+                        if(circleParams!=null){
+
+                            if(centerExists){
+                                adjacentCircle = new Circle(circleParams[0], circleCenter, Integer.parseInt(circleParams[1]));
+                            }
+                            else{
+
+                                if(centerParams!=null){
+                                    circleCenter = new Point(centerParams[0], Integer.parseInt(centerParams[1]), Integer.parseInt(centerParams[2]));
+                                    adjacentCircle = new Circle(circleParams[0], circleCenter, Integer.parseInt(circleParams[1]));
+                                }
+                                else{
+                                    int centerX = (start.getX()+end.getX()) / 2;
+                                    int centerY = (start.getY()+end.getY()) / 2;
+                                    circleCenter = new Point(circleParams[0], centerX, centerY);
+                                    adjacentCircle = new Circle(circleParams[0], circleCenter, Integer.parseInt(circleParams[1]));
+                                }
+                                drawPoint(g, circleCenter.getX(), circleCenter.getY(), circleCenter.getId());
+                                idTable.add(adjacentCircle);
+                            }
                         }
                         else{
 
-                            int radius = (int) Math.round(Math.sqrt(Math.abs(Math.pow(end.getX()-start.getX(),2)+(Math.pow(end.getY()-start.getY(),2)))))/2;
-                            int centerX = (start.getX()+end.getX())/2;
-                            int centerY = (start.getY()+end.getY())/2;
+                            int centerX = (start.getX()+end.getX()) / 2;
+                            int centerY = (start.getY()+end.getY()) / 2;
+                            int radius = (int) (Math.round(Math.sqrt(Math.abs(Math.pow(end.getX()-start.getX(),2)+(Math.pow(end.getY()-start.getY(),2)))))/2);
 
-                            circleCenter = operatePoint(g, diameterParams[2], centerX, centerY);
+                            circleCenter = new Point(diameterParams[2], centerX, centerY);
                             adjacentCircle = new Circle(diameterParams[2], circleCenter, radius);
-                            drawCircle(g, adjacentCircle);
-                            idTable.add(adjacentCircle);
-
-                            newDiameter = new Diameter(start.getId()+end.getId(), start, end, adjacentCircle);
-                            if(drawDiameter(g, newDiameter))
-                                idTable.add(newDiameter);
                         }
+                        drawCircle(g, adjacentCircle);
+                        idTable.add(adjacentCircle);
                     }
+
+                    newDiameter = new Diameter(diameterParams[0]+diameterParams[1], start, end, adjacentCircle);
+                    if(drawDiameter(g, newDiameter))
+                        idTable.add(newDiameter);
                 }
             }
             else if(command.contains("Chord")) {
@@ -517,25 +346,26 @@ public class GraphicWindow extends JPanel {
                 if (!exists) {
                     Point start, end;
                     Circle adjacentCircle;
-                    boolean startExists = false, endExists = false, circleExists = false;
+                    boolean startExists = false, endExists = false, circleExists = false, centerExists=false;
 
                     String[] startParams = null, endParams = null, circleParams = null, centerParams;
 
                     for (String c : commands) {
                         if (c.contains("Point") && c.contains(chordParams[0])) {
                             startParams = extractParameters(c);
-                            startExists=true;
+
                         }
                         else if (c.contains("Point") && c.contains(chordParams[1])) {
                             endParams = extractParameters(c);
-                            endExists = true;
+
                         }
                         else if(c.contains("Point") && c.contains(chordParams[2])){
                             centerParams = extractParameters(c);
+
                         }
                         else if (c.contains("Circle") && c.contains(chordParams[2])) {
                             circleParams = extractParameters(c);
-                            circleExists = true;
+
                         }
                     }
 
@@ -545,20 +375,24 @@ public class GraphicWindow extends JPanel {
                         {
                             if (s.getId().equals(chordParams[0])) {
                                 start = (Point) s;
+                                startExists=true;
                             }
                             else if (s.getId().equals(chordParams[1])) {
                                 end = (Point) s;
+                                endExists = true;
                             }
                             else if (s.getId().equals(chordParams[2])) {
                                 circleCenter = (Point) s;
+                                centerExists=true;
                             }
                         }
                         else if (s instanceof Circle && s.getId().equals(chordParams[0])) {
                             adjacentCircle = (Circle) s;
+                            circleExists = true;
                         }
                     }
 
-                    if(startExists && endExists && circleExists){
+                    if(startExists && endExists && circleExists && centerExists){
 
                         start = new Point(startParams[0], Integer.parseInt(startParams[1]), Integer.parseInt(startParams[2]));
                         end = new Point(endParams[0], Integer.parseInt(endParams[1]), Integer.parseInt(endParams[2]));
