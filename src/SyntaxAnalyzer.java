@@ -6,63 +6,35 @@ class SyntaxAnalyzer {
 
 <TEXT> ::= <SENTENCE_LIST> | #
 <SENTENCE_LIST> ::= <SENTENCE> | <SENTENCE> '.' <SENTENCE_LIST>
-<SENTENCE> ::= <POINT_ACTION> | <CIRCLE_ACTION> | <LINE_ACTION>
-
-
-
+<SENTENCE> ::= <POINT_ACTION> | <TRIANGLE_ACTION> | <LINE_ACTION>
 
 <POINT_ACTION> ::= "Познач(ити|те)" "точк(у|и)"  <POINT_LIST>
 <POINT_LIST> ::= <POINT> | <POINT> ',' <POINT_LIST>
 <POINT> ::= <ID> | <ID> "(із|з)" "координатами" <COORDINATE>
 <COORDINATE> ::= '(' <INT> ';' <INT> ')'
 
-    Ex.:    Познач точку A
-            Позначте точку D1 з координатами (-14;9)
-            Позначити точки G, F1, C із координатами (78;-23), J
+<TRIANGLE_ACTION> ::= "Побуд(увати|йте|уй) " "трикутник(и) " <TRIANGLE_LIST>
+<TRIANGLE_LIST> ::= <TRIANGLE> | <TRIANGLE> ',' <TRIANGLE_LIST>
+<TRIANGLE> ::= <ID><ID><ID>
 
+<LINE_ACTION> ::= ("Прове(сти|діть|ди) ")  "висот(а|и)" <HEIGHT_LIST>
+                                           "медіан(а|и)" <MEDIAN_LIST>
+                                           "бісектрис(а|и)" <BISECTOR_LIST>
+                                           "відріз(ок|ки)" <SEGMENT_LIST>
 
+<HEIGHT_LIST> ::= <HEIGHT> | <HEIGHT> ',' <HEIGHT_LIST>
+<HEIGHT> ::= <ID><ID> "з " "кута " <ANGLE> "до " "сторони " <SEGMENT>
 
+<MEDIAN_LIST> ::= <MEDIAN> | <MEDIAN> ',' <MEDIAN_LIST>
+<HEIGHT> ::= <ID><ID> "з " "кута " <ANGLE> "до " "сторони " <SEGMENT>
 
-<CIRCLE_ACTION> ::= "Побуд(увати|йте|уй)" "кол(о|а)" "(із|з)" "центр(ом|ами)" <CIRCLE_LIST>
-<CIRCLE_LIST> ::= <CIRCLE> | <CIRCLE> ',' <CIRCLE_LIST>
-<CIRCLE> ::=  <ID> | <ID> "з" "радіусом" <INT>
+<ANGLE> ::= <ID> | <ID><ID><ID>
 
-    Ex.:    Побудуй коло із центром O,
-            Побудувати коло з центром V з радіусом 15
-            Побудувати кола з центрами C, D2, S з радіусом 7, Q, P з радіусом 234
+<BISECTOR_LIST> ::= <BISECTOR> | <BISECTOR> ',' <BISECTOR_LIST>
+<BISECTOR> ::= <ID><ID>
 
-
-
-
-<LINE_ACTION> ::= ("Прове(сти|діть|ди) ") ("хорд(а|и)" <RADIUS_LIST>        |
-                                           "діаметр(и)" <DIAMETER_LIST>     |
-                                           "радіус(и)" <CHORD_LIST>         |
-                                           "відріз(ок|ки)" <SEGMENT_LIST>   )
-
-
-<RADIUS_LIST> ::=  <RADIUS> | (<RADIUS> ',' <RADIUS_LIST)
-
-<RADIUS> ::= <ID><ID>
-
-
-<DIAMETER_LIST> ::= <DIAMETER> | <DIAMETER> ',' <DIAMETER_LIST>
-
-<DIAMETER> ::= <ID><ID> "на" "колі" <ID>
-
-
-<CHORD_LIST> ::= <CHORD> | <CHORD> ',' <CHORD_LIST>
-
-<CHORD> ::= <ID><ID> "на" "колі" <ID>
-
-
-<SEGMENT_LIST> ->  <SEGMENT> | <SEGMENT> ',' <SEGMENT_LIST>
-
-<SEGMENT> -> <ID><ID>
-
-    Ex.:    Побудуй радіус OK
-            Побудуйте діаметр PK на колі O
-            Побудувати хорди GH на колі O1, AF на колі O1
-            Провести відрізки DF1, AT
+<SEGMENT_LIST> ::= <SEGMENT> | <SEGMENT> ',' <SEGMENT_LIST>
+<SEGMENT> ::= <ID><ID>
 
 */
 
@@ -164,12 +136,9 @@ class SyntaxAnalyzer {
         pointNode.addChild(new AST("ID", currentPair.getValue()));  // ID (e.g., "O")
         nextPair();
         if(expect(LexicalAnalyzer.Token.EXTRA)){
-                nextPair();  // "із" or "з"
-                nextPair();  // "координатами"
+                nextPair();
+                nextPair();
                 pointNode.addChild(parseCoordinate());
-        }
-        else{
-
         }
         return pointNode;
     }
@@ -212,9 +181,8 @@ class SyntaxAnalyzer {
         if(currentPair.getToken() != LexicalAnalyzer.Token.DOT
                 && currentPair.getToken() != LexicalAnalyzer.Token.COMMA
                 && currentPair.getToken() != LexicalAnalyzer.Token.TEXT_END) nextPair();
-        while (expect(LexicalAnalyzer.Token.COMMA)) {
+        while (expect(LexicalAnalyzer.Token.COMMA))
             circleListNode.addChild(parseCircle());
-        }
 
         return circleListNode;
     }
