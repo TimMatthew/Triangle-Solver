@@ -31,175 +31,86 @@ public class ConLLUAnalyzer {
         hypotenuses = new ArrayList<>();
         angles = new ArrayList<>();
         heights = new ArrayList<>();
+        target = new ArrayList<>();
         this.lexemsInfo = lexemsInfo;
     }
 
-    public void analyze(){
+    public ArrayList<String> analyze(){
 
         ArrayList<String[]> lexemsInfoList = new ArrayList<>();
 
         for(int i=0; i< lexemsInfo.length; i++){
             String[] lexemInfo = lexemsInfo[i].split(" ");
-//            String personalLevel = lexemInfo[1];
-//            String lexemForm = lexemInfo[2];
-//            String lematizedForm = lexemInfo[3];
-//            String languagePart = lexemInfo[4];
-//            String description = lexemInfo[5];
-//            String rootLevel = lexemInfo[6];
-//
-//            String[] necessaryLexemInfo = new String[6];
-//            necessaryLexemInfo[0] = personalLevel;
-//            necessaryLexemInfo[1] = lexemForm;
-//            necessaryLexemInfo[2] = lematizedForm;
-//            necessaryLexemInfo[3] = languagePart;
-//            necessaryLexemInfo[4] = description;
-//            necessaryLexemInfo[5] = rootLevel;
-
             lexemsInfoList.add(lexemInfo);
         }
 
+        StringBuilder buffer = new StringBuilder();
 
-        for(String[] arr : lexemsInfoList){
-            String buffer;
-            for(int i=0; i< arr.length; i++){
-                String s = arr[i];
+        for(String[] lexem : lexemsInfoList){
 
-                if(s.matches("рівнобедрений|рівнобедреному")){
+            String s;
+            if(Objects.equals(lexem[2], "ч")) s = lexem[1];
+            else s = lexem[2];
+            ArrayList<String> lexemList = new ArrayList<>(Arrays.asList(lexem));
 
+            boolean isRightLangPart = !(lexemList.get(3).equals("ADP") || lexemList.get(3).equals("PUNCT") || lexemList.get(3).equals("DET") || lexemList.get(3).equals("SCONJ") || lexemList.get(3).equals("CCONJ") || lexemList.get(2).equals("мати"));
+            if(isRightLangPart || lexemList.get(2).equals("ч")){
+                if(lexemList.get(1).equals("катети") || lexemList.get(1).equals("Катети")) buffer.append("катети");
+                else if(lexemList.get(1).equals("катета") || lexemList.get(1).equals("Катета")) buffer.append("катет");
+                else if(lexemList.get(1).equals("проекції") || lexemList.get(1).equals("Проекції")) buffer.append("проекції");
+                else if(lexemList.get(3).equals("X")) buffer.append(lexemList.get(1));
+                else buffer.append(s);
+                buffer.append(" ");
+            }
+
+            if(buffer.toString().matches("(рівнобедрений прямокутний|прямокутний рівнобедрений) трикутник( ([A-Z]\\d*){3}) ")){
+
+                triangles.add(buffer.toString());
+                buffer = new StringBuilder();
+            }
+            else if(buffer.toString().matches("гіпотенуза( ([A-Z]\\d*){2})? дорівнювати (\\d(√\\d)?(,\\d)?)+ (см|км|м)? ")){
+                hypotenuses.add(buffer.toString());
+                buffer = new StringBuilder();
+            }
+            else if(buffer.toString().matches("(катет( ([A-Z]\\d*){2})?|катети(( ([A-Z]\\d*){2})( ([A-Z]\\d*){2}))?)( (рівнобедрений прямокутний|прямокутний рівнобедрений) трикутник( ([A-Z]\\d*){3}))? дорівнювати (\\d(√\\d)?(,\\d)?)+ (см|км|м) ")){
+                legs.add(buffer.toString());
+                buffer = new StringBuilder();
+            }
+            else if(buffer.toString().matches("проекці(ї|я)?( ([A-Z]\\d*){2})? гіпотенуза( ([A-Z]\\d*){2})? дорівнювати (\\d(√\\d)?(,\\d)?)+ (см|км|м)? ")){
+                legs.add(buffer.toString());
+                buffer = new StringBuilder();
+            }
+            else if(buffer.toString().matches("(висота|медіана|бісектриса) ділити гіпотенуза навпіл ")
+                    || buffer.toString().matches("(висота|медіана|бісектриса)( ([A-Z]\\d*){2})? проведений вершина прямий кут( [A-Z](\\d*)| (([A-Z](\\d*)){3}))? дорівнювати (\\d(√\\d)?(,\\d)?)+ (см|км|м) ")
+                    || buffer.toString().matches("(висота|медіана|бісектриса)( ([A-Z]\\d*){2})? проведений гіпотенуза( (([A-Z](\\d*)){2}))? дорівнювати (\\d(√\\d)?(,\\d)?)+ (см|км|м) ")
+                    || buffer.toString().matches("медіана( ([A-Z]\\d*){2})? проведений гострий кут( [A-Z](\\d*)| (([A-Z](\\d*)){3}))? (катет|сторона)( ([A-Z]\\d*){2}) ")
+                    || buffer.toString().matches("(висота|медіана|бісектриса)( ([A-Z]\\d*){2})? дорівнювати (\\d(√\\d)?(,\\d)?)+ (см|км|м) "))
+            {
+                heights.add(buffer.toString());
+                buffer = new StringBuilder();
+            }
+
+            else if(buffer.toString().matches("кут ([A-Z](\\d*)|(([A-Z](\\d*)){3})) дорівнювати \\d+ градус ")){
+                angles.add(buffer.toString());
+                buffer = new StringBuilder();
+            }
+            else if (buffer.toString().contains("знайти")) {
+                if(lexemsInfoList.indexOf(lexem) == lexemsInfoList.size()-1){
+                    target.add(buffer.toString());
+                    buffer = new StringBuilder();
                 }
             }
+
         }
 
-        //findGivenData(lexemsInfoList, "0", new StringBuilder(), new ArrayList<>());
+        ArrayList<String> conditions = new ArrayList<>();
+        conditions.addAll(triangles);
+        conditions.addAll(legs);
+        conditions.addAll(hypotenuses);
+        conditions.addAll(angles);
+        conditions.addAll(heights);
+        conditions.addAll(target);
+
+        return conditions;
     }
-
-    private void findGivenData(ArrayList<String[]> lexemsInfoList, String number, StringBuilder condition, ArrayList<String[]> taskPart) {
-
-
-
-//        String[] curElem = new String[0];
-//        for (String[] arr: lexemsInfoList){
-//           for(String s: arr){
-//               if (s.equals(number)) {
-//                   curElem = arr;
-//                   break;
-//               }
-//           }
-//        }
-//
-//        String lemma = curElem[2];
-//        String partOfLang = curElem[3];
-//        String nextLevel = curElem[0];
-//        String partOfSent = curElem[7];
-//
-//
-
-//        if(partOfLang.equals("NOUN")){
-//
-//            if(lemma.contains("трикутник")){
-//                taskPart.add(curElem);
-//                findGivenData(lexemsInfoList, nextLevel, condition, taskPart);
-//            }
-//            else if(lemma.contains("катет")){
-//                taskPart.add(curElem);
-//                findGivenData(lexemsInfoList, nextLevel, condition, taskPart);
-//            }
-//            else if(lemma.contains("гіпотенуза")){
-//                taskPart.add(curElem);
-//                findGivenData(lexemsInfoList, nextLevel, condition, taskPart);
-//            }
-//            else if (lemma.contains("висот")) {
-//                taskPart.add(curElem);
-//                findGivenData(lexemsInfoList, nextLevel, condition, taskPart);
-//            }
-//            else if (lemma.contains("медіан")) {
-//                taskPart.add(curElem);
-//                findGivenData(lexemsInfoList, nextLevel, condition, taskPart);
-//            }
-//
-//        }
-//        else if(partOfLang.equals("VERB")){
-//            if(lemma.equals("дорівнювати")){
-//                taskPart.add(curElem);
-//                findGivenData(lexemsInfoList, nextLevel, condition, taskPart);
-//            }
-//            else if(lemma.equals("знайти")){
-//
-//            }
-//            else{
-//                findGivenData(lexemsInfoList, nextLevel, condition, taskPart);
-//            }
-//        }
-//        else if(partOfLang.equals("ADJ")){
-//            for(String[] arr : taskPart){
-//                for(String s : arr){
-//
-//                }
-//            }
-//        }
-//        else{
-//
-//        }
-    }
-
-    private boolean checkID(String s) {
-        return s.matches("[A-Z][A-Z\\d]*");
-    }
-
-
-    public String[] getLexemsInfo() {
-        return lexemsInfo;
-    }
-
-
 }
-
-
-
-
-
-
-
-
-//curElem=infoList;
-
-
-
-//                if(curElem[3].equals("NOUN")){
-//
-//                    if(!objectData.isEmpty()){
-//                        geomObjectTable.add(String.valueOf(objectData));
-//                        objectData.delete(0, objectData.length());
-//                        objectData.append(curElem[3]);
-//                    }
-//                    else{
-//                        objectData.append(curElem[3]);
-//                    }
-//                }
-//                else if(curElem[3].equals("ADJ")){
-//                    if(!objectData.isEmpty() && (objectData.toString().contains("трикутник")
-//                                                || objectData.toString().contains("висота")
-//                                                || objectData.toString().contains("медіана")
-//                                                || objectData.toString().contains("бісектриса"))){
-//
-//                    }
-//                }
-//                else if(curElem[3].equals("VERB")){
-//
-//                }
-
-               /* if(infoList[3].matches("NOUN|ADJ")){
-
-                    objectData.append(infoList[2]).append(" ");
-                }
-
-                else if(infoList[3].equals("X") && objectData.toString().equals("трикутник pівнобедренний прямокутний ")){
-
-                    if(checkID(infoList[3])){
-                        String triangle = infoList[2];
-                        geomObjectTable.add(objectData+triangle);
-                        objectData.delete(0, objectData.length());
-                    }
-                }
-
-                findGivenData(lexemsInfoList, curElem[0], objectData);*/

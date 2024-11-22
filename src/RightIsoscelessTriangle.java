@@ -16,6 +16,10 @@ public class RightIsoscelessTriangle extends Shape{
         this.heights = new ArrayList<>();
     }
 
+    public RightIsoscelessTriangle(String id) {
+        super(id);
+    }
+
     public Segment getLeg1() {
         return leg1;
     }

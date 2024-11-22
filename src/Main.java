@@ -32,7 +32,7 @@ public class Main {
 
         // Отримання задачі
         String[] tasks = testConstructor.toString().split("\n");
-        short taskNumber = 0;
+        short taskNumber = 9;
         String task;
 
         // Препроцесинг : заміна "." в середині речення на ";"
@@ -88,8 +88,10 @@ public class Main {
         ConLLUAnalyzer conLLUAnalyzer = new ConLLUAnalyzer(Objects.requireNonNull(ConLLUSplitArray), numericValues);
         System.out.println("Processed Text: ");
 
-        conLLUAnalyzer.analyze();
-        //System.out.println(conditions.toString());
+        ArrayList<String> taskConditions = conLLUAnalyzer.analyze();
+        System.out.println(taskConditions.toString());
+
+        DrawCommander dc = new DrawCommander(taskConditions);
 
 //        // Лексичний аналіз
 //        LexicalAnalyzer la = new LexicalAnalyzer();
