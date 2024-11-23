@@ -921,15 +921,16 @@ public class DrawCommander {
             idLeg1 = ids.getFirst() + ids.get(1);
             idLeg2 = ids.get(1)+ids.get(2);
             idHypotenuse = ids.get(0)+ids.get(2);
+            idMedian = newMedian.getId();
         }
 
         if(hasDigits){
             if(cond.contains("гострий")){
-                if(newMedian.getId().charAt(0) == idLeg1.charAt(0)){
-                    graphicsDescription.add("Провести медіану " + newMedian.getId() + " до катета " + idLeg1 + ".");
-                }
-                else if(newMedian.getId().charAt(0) == idLeg2.charAt(0)){
+                if(!idLeg2.contains(String.valueOf(newMedian.getId().charAt(0)))){
                     graphicsDescription.add("Провести медіану " + newMedian.getId() + " до катета " + idLeg2 + ".");
+                }
+                else if(!idLeg1.contains(String.valueOf(newMedian.getId().charAt(0)))){
+                    graphicsDescription.add("Провести медіану " + newMedian.getId() + " до катета " + idLeg1 + ".");
                 }
             }
             else if(cond.contains("прямий")){
@@ -937,7 +938,7 @@ public class DrawCommander {
             }
         }
 
-        if(cond.contains("гострий")){
+        else if(cond.contains("гострий")){
                 graphicsDescription.add("Провести медіану " + identifier + " до катета " + legId + ".");
         }
         else if(cond.contains("прямий")){

@@ -105,8 +105,6 @@ public class Main {
         System.out.println(textForLexer);
 
 
-
-
 //        // Лексичний аналіз
 //        LexicalAnalyzer la = new LexicalAnalyzer();
 //        List<Pair> tokens = la.analyze(task);
