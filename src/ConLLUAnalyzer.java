@@ -49,7 +49,7 @@ public class ConLLUAnalyzer {
         for(String[] lexem : lexemsInfoList){
 
             String s;
-            if(Objects.equals(lexem[2], "ч")) s = lexem[1];
+            if(Objects.equals(lexem[2], "ч") || lexem[4].equals("X")) s = lexem[1];
             else s = lexem[2];
             ArrayList<String> lexemList = new ArrayList<>(Arrays.asList(lexem));
 
@@ -76,12 +76,12 @@ public class ConLLUAnalyzer {
                 legs.add(buffer.toString());
                 buffer = new StringBuilder();
             }
-            else if(buffer.toString().matches("проекці(ї|я)?( ([A-Z]\\d*){2})? гіпотенуза( ([A-Z]\\d*){2})? дорівнювати (\\d(√\\d)?(,\\d)?)+ (см|км|м)? ")){
+            else if(buffer.toString().matches("(проекція( ([A-Z]\\d*){2})?|проекції(( ([A-Z]\\d*){2})( ([A-Z]\\d*){2}))?) гіпотенуза( ([A-Z]\\d*){2})? дорівнювати (\\d(√\\d)?(,\\d)?)+ (см|км|м)? ")){
                 legs.add(buffer.toString());
                 buffer = new StringBuilder();
             }
             else if(buffer.toString().matches("(висота|медіана|бісектриса) ділити гіпотенуза навпіл ")
-                    || buffer.toString().matches("(висота|медіана|бісектриса)( ([A-Z]\\d*){2})? проведений вершина прямий кут( [A-Z](\\d*)| (([A-Z](\\d*)){3}))? дорівнювати (\\d(√\\d)?(,\\d)?)+ (см|км|м) ")
+                    || buffer.toString().matches("(висота|медіана|бісектриса)( ([A-Z]\\d*){2})? проведений (вершина)? прямий кут( [A-Z](\\d*)| (([A-Z](\\d*)){3}))? дорівнювати (\\d(√\\d)?(,\\d)?)+ (см|км|м) ")
                     || buffer.toString().matches("(висота|медіана|бісектриса)( ([A-Z]\\d*){2})? проведений гіпотенуза( (([A-Z](\\d*)){2}))? дорівнювати (\\d(√\\d)?(,\\d)?)+ (см|км|м) ")
                     || buffer.toString().matches("медіана( ([A-Z]\\d*){2})? проведений гострий кут( [A-Z](\\d*)| (([A-Z](\\d*)){3}))? (катет|сторона)( ([A-Z]\\d*){2}) ")
                     || buffer.toString().matches("(висота|медіана|бісектриса)( ([A-Z]\\d*){2})? дорівнювати (\\d(√\\d)?(,\\d)?)+ (см|км|м) "))

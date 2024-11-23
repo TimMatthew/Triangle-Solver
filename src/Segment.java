@@ -1,9 +1,15 @@
 public class Segment extends Shape{
 
-    private final Point start;
-    private final Point end;
+    private Point start;
+    private Point end;
     private double length;
     private String measure;
+    private String segmentType;
+
+    public Segment(String id, String type) {
+        super(id);
+        segmentType = type;
+    }
 
     public Segment(String id, Point start, Point end) {
         super(id);
@@ -19,6 +25,13 @@ public class Segment extends Shape{
         this.measure = measure;
     }
 
+    public String getSegmentType() {
+        return segmentType;
+    }
+
+    public void setSegmentType(String segmentType) {
+        this.segmentType = segmentType;
+    }
     public double getLength() {
         return length;
     }

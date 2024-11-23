@@ -25,6 +25,7 @@ public class Main {
                 testConstructor.append(line).append("\n");
 
             System.out.println("---------------TEST TASK---------------\n");
+
         }
         catch (IOException e) {
             throw new RuntimeException(e);
@@ -32,10 +33,11 @@ public class Main {
 
         // Отримання задачі
         String[] tasks = testConstructor.toString().split("\n");
-        short taskNumber = 9;
+        Scanner sc = new Scanner(System.in);
+        System.out.println("Введіть номер задачі: ");
+        short taskNumber = Short.parseShort(sc.nextLine());
         String task;
 
-        // Препроцесинг : заміна "." в середині речення на ";"
         if(taskNumber>=0 && taskNumber<tasks.length) task=tasks[taskNumber];
         else task = tasks[0];
         ArrayList<String> numericValues;
@@ -89,9 +91,21 @@ public class Main {
         System.out.println("Processed Text: ");
 
         ArrayList<String> taskConditions = conLLUAnalyzer.analyze();
-        System.out.println(taskConditions.toString());
 
         DrawCommander dc = new DrawCommander(taskConditions);
+        Shape mainShape = dc.makeCommandsAndObjects();
+
+        ArrayList<String> graphicsDescription = dc.getGraphicsDescription();
+
+        StringBuilder textForLexer = new StringBuilder();
+        for(String s: graphicsDescription){
+            textForLexer.append(s).append("\n");
+        }
+
+        System.out.println(textForLexer);
+
+
+
 
 //        // Лексичний аналіз
 //        LexicalAnalyzer la = new LexicalAnalyzer();
@@ -117,6 +131,8 @@ public class Main {
 //        // Виконання задач
 //        GraphicWindow window = GraphicWindow.createAndShowGUI();
 //        window.setCommands(geomCommands.split("\n"));
+//        String target = dc.getTarget();
+//        Solver solver = new Solver(mainShape, target);
 
 
     }

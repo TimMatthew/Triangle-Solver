@@ -217,7 +217,6 @@ public class ASTRecorder {
                     builder.append(String.format("drawSegment(%s, %s);%n", startId, endId));
                 }
             }
-
         }
         return builder.toString();
     }

@@ -7,17 +7,43 @@ public class RightIsoscelessTriangle extends Shape{
     private Segment hypotenuse;
     private double square;
     private double perimeter;
-    ArrayList<Segment> heights;
+    private ArrayList<Segment> heights;
+    private ArrayList<Segment> medians;
+    private ArrayList<Segment> projections;
+
+    public RightIsoscelessTriangle(String id) {
+        super(id);
+        this.medians = new ArrayList<>();
+        this.heights = new ArrayList<>();
+        this.projections = new ArrayList<>();
+    }
     public RightIsoscelessTriangle(String id, Segment leg1, Segment leg2, Segment hypotenuse) {
         super(id);
         this.leg1 = leg1;
         this.leg2 = leg2;
         this.hypotenuse = hypotenuse;
+        this.medians = new ArrayList<>();
+        this.projections = new ArrayList<>();
         this.heights = new ArrayList<>();
     }
 
-    public RightIsoscelessTriangle(String id) {
-        super(id);
+    public ArrayList<Segment> getProjections() {
+        return projections;
+    }
+    public ArrayList<Segment> getMedians() {
+        return medians;
+    }
+
+    public void setMedians(ArrayList<Segment> medians) {
+        this.medians = medians;
+    }
+
+    public ArrayList<Segment> getHeights() {
+        return heights;
+    }
+
+    public void setHeights(ArrayList<Segment> heights) {
+        this.heights = heights;
     }
 
     public Segment getLeg1() {
