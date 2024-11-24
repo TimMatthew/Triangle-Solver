@@ -192,7 +192,7 @@ public class GraphicWindow extends JPanel {
         g.drawString(id, offsetX, offsetY);
     }
 
-    private void drawSegment(Graphics g, Point start, Point end, double length, String measure, int lengthOffsetX, int lengthOffsetY, int measureOffsetX, int measureOffsetY) {
+    private void drawSegment(Graphics g, Point start, Point end, double length, String measure, int measureOffsetX, int measureOffsetY) {
 
         Graphics2D g2d = (Graphics2D) g;
         g2d.setStroke(new BasicStroke(3.4f));
