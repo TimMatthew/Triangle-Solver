@@ -70,7 +70,7 @@ public class DrawCommander {
                     makeLeg(condition, isTriangleBuilt);
                     target = "leg";
                 }
-                else if(condition.contains("висота") || condition.contains("бісектриси")){
+                else if(condition.contains("висота") || condition.contains("бісектрис")){
                     makeHeight(condition, isTriangleBuilt);
                     target = "height";
                 }

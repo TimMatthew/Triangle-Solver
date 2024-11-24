@@ -1,6 +1,5 @@
 import java.io.*;
 import java.nio.charset.StandardCharsets;
-import java.sql.SQLOutput;
 import java.util.*;
 import java.net.*;
 public class Main {
@@ -55,7 +54,7 @@ public class Main {
         //}
 
 
-        System.out.println("-------------UDPipe ANALYSIS-------------");
+        //System.out.println("-------------UDPipe ANALYSIS-------------");
         try {
             String urlString = "https://lindat.mff.cuni.cz/services/udpipe/api/process";
             URL url = new URL(urlString);
@@ -86,13 +85,12 @@ public class Main {
             e.printStackTrace();
         }
 
-        for(String s: ConLLUSplitArray){
-            System.out.println(s);
-        }
+//        for(String s: ConLLUSplitArray){
+//            System.out.println(s);
+//        }
 
 
         ConLLUAnalyzer conLLUAnalyzer = new ConLLUAnalyzer(Objects.requireNonNull(ConLLUSplitArray), numericValues);
-        System.out.println("Processed Text: ");
 
         ArrayList<String> taskConditions = conLLUAnalyzer.analyze();
 
@@ -110,7 +108,7 @@ public class Main {
             else textForLexer.append(graphicsDescription.get(i)).append("\n");
         }
 
-        System.out.println(textForLexer);
+        //System.out.println(textForLexer);
 
 
         // Лексичний аналіз
@@ -139,11 +137,17 @@ public class Main {
         window.setCommands(geomCommands.split("\n"));
         window.setMainShape(mainShape);
 
-
         // Розв'язування
         String target = dc.getTarget();
         Solver solver = new Solver(mainShape, target);
+        ArrayList<String> providedSolution = solver.solve();
+        int i = 1;
+        for(String s : providedSolution){
 
+            System.out.println("------ДІЯ "+i+"------");
+            System.out.println(s);
+            i++;
+        }
 
     }
 
