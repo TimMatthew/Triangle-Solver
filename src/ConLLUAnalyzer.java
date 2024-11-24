@@ -68,7 +68,7 @@ public class ConLLUAnalyzer {
                 triangles.add(buffer.toString());
                 buffer = new StringBuilder();
             }
-            else if(buffer.toString().matches("гіпотенуза( ([A-Z]\\d*){2})? дорівнювати (\\d(√\\d)?(,\\d)?)+ (см|км|м)? ")){
+            else if(buffer.toString().matches("гіпотенуза( ([A-Z]\\d*){2})?( (рівнобедрений прямокутний|прямокутний рівнобедрений) трикутник( ([A-Z]\\d*){3}))? дорівнювати (\\d(√\\d)?(,\\d)?)+ (см|км|м)? ")){
                 hypotenuses.add(buffer.toString());
                 buffer = new StringBuilder();
             }
@@ -80,7 +80,7 @@ public class ConLLUAnalyzer {
                 legs.add(buffer.toString());
                 buffer = new StringBuilder();
             }
-            else if(buffer.toString().matches("(висота|медіана|бісектриса) ділити гіпотенуза навпіл ")
+            else if(buffer.toString().matches("(висота|медіана|бісектриса)( ([A-Z]\\d*){2})? ділити гіпотенуза( ([A-Z]\\d*){2})? навпіл ")
                     || buffer.toString().matches("(висота|медіана|бісектриса)( ([A-Z]\\d*){2})? проведений (вершина)? прямий кут( [A-Z](\\d*)| (([A-Z](\\d*)){3}))? дорівнювати (\\d(√\\d)?(,\\d)?)+ (см|км|м) ")
                     || buffer.toString().matches("(висота|медіана|бісектриса)( ([A-Z]\\d*){2})? проведений гіпотенуза( (([A-Z](\\d*)){2}))? дорівнювати (\\d(√\\d)?(,\\d)?)+ (см|км|м) ")
                     || buffer.toString().matches("медіана( ([A-Z]\\d*){2})? проведений гострий кут( [A-Z](\\d*)| (([A-Z](\\d*)){3}))? (катет|сторона)( ([A-Z]\\d*){2}) ")

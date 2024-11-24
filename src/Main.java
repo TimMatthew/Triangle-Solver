@@ -2,20 +2,10 @@ import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.net.*;
+
 public class Main {
 
     public static void main(String[] args) {
-
-
-        //
-        // (1) Провести препроцесинг задачі
-        // (2) Запустити UDPipe й отримати результат
-        // (3) На основі результату сформувати речення формальної мови та
-        // необхідні об'єкти для розв'язання задачі
-        // (4) Дати ці об'єкти класу розв'яку
-        // (5) Речення дати лексичному аналізатору
-        // (6) Далі синтаксичному аналізатору
-        // (7) По командах формувати малюнок до задачі
 
         Scanner sc = new Scanner(System.in);
         System.out.println("Введіть номер задачі: ");

@@ -556,7 +556,7 @@ public class DrawCommander {
             if(commaIndex != -1){
 
                 integer = Double.parseDouble(w.substring(0, commaIndex));
-                decimalPart = Double.parseDouble(w.substring(commaIndex+1));
+                decimalPart = Double.parseDouble("0."+w.substring(commaIndex+1));
                 return integer+decimalPart;
             }
             else{
@@ -878,9 +878,11 @@ public class DrawCommander {
                     for(char c1: w.toCharArray()){
                         if(Character.isDigit(c1)) hasDigits = true;
                     }
-                    if(identifier.charAt(0) == w.charAt(0)) legId = String.valueOf(w.charAt(1))+w.charAt(2);
-                    else if(identifier.charAt(0) == w.charAt(2)) legId = String.valueOf(w.charAt(0))+w.charAt(1);
-                    else if(identifier.charAt(0) == w.charAt(1)) hypotenuseId = String.valueOf(w.charAt(0))+w.charAt(2);
+                    if(!identifier.isEmpty()){
+                        if(identifier.charAt(0) == w.charAt(0)) legId = String.valueOf(w.charAt(1))+w.charAt(2);
+                        else if(identifier.charAt(0) == w.charAt(2)) legId = String.valueOf(w.charAt(0))+w.charAt(1);
+                        else if(identifier.charAt(0) == w.charAt(1)) hypotenuseId = String.valueOf(w.charAt(0))+w.charAt(2);
+                    }
                     found = true;
                     break;
                 }

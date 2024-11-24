@@ -260,7 +260,6 @@ public class Solver {
             measure = triangle.getProjections().getFirst().getMeasure();
             // Action 1
             sb.append("Знаходимо гіпотенузу через проекцію (").append(triangle.getProjections().getFirst().getId()).append("):");
-            sb.append("\n").append(triangle.getProjections().getFirst().getId()).append("*2 = ").append(triangle.getProjections().getFirst().getLength()).append("*2 = ").append(result);
             double hypotenuseVal = triangle.getProjections().getFirst().getLength() * 2;
             sb.append("\n").append(triangle.getProjections().getFirst().getId()).append("*2 = ").append(triangle.getProjections().getFirst().getLength()).append("*2 = ").append(result).append(measure);
             solution.add(sb.toString());
@@ -343,7 +342,7 @@ public class Solver {
 
         if (triangle.getLeg1().getLength() != 0 && triangle.getLeg2().getLength() != 0) {
             measure = triangle.getLeg1().getMeasure();
-            sb.append("! Знаходимо гіпотенузу ").append(leg1Ids.getFirst()).append(leg2Ids.getFirst()).append(" через катети (").append(triangle.getLeg1().getId()).append(", ").append(triangle.getLeg2().getId()).append("): ");
+            sb.append("! Знаходимо гіпотенузу ").append(triangle.getHypotenuse().getId()).append(" через катети (").append(triangle.getLeg1().getId()).append(", ").append(triangle.getLeg2().getId()).append("): ");
 
             result = triangle.getLeg1().getLength() * Math.sqrt(2);
             sb.append(triangle.getLeg1().getId()).append("*√2 = ").append(triangle.getLeg1().getLength()).append("*√2 = ").append(result);
@@ -440,6 +439,7 @@ public class Solver {
         }
 
         result = Math.sqrt(semiResult)/4;
+        sb.append(" = ").append(result).append(" ").append(measure);
         sb.append("\n Отже, медіана ").append(medianIds.getFirst()).append(medianIds.get(1)).append(" = ").append(result);
         solution.add(sb.toString());
 
@@ -455,7 +455,8 @@ public class Solver {
         Matcher hypotenuseMatcher = pattern.matcher(triangle.getHypotenuse().getId());
         Matcher leg1Matcher = pattern.matcher(triangle.getLeg1().getId());
         Matcher leg2Matcher = pattern.matcher(triangle.getLeg2().getId());
-        Matcher heightMatcher = pattern.matcher(triangle.getHeights().getFirst().getId());
+        Matcher heightMatcher = null;
+        if(!triangle.getHeights().isEmpty()) heightMatcher = pattern.matcher(triangle.getHeights().getFirst().getId());
         Matcher projectionMatcher=null;
         if(!triangle.getProjections().isEmpty()) projectionMatcher = pattern.matcher(triangle.getProjections().getFirst().getId());
 
@@ -477,7 +478,7 @@ public class Solver {
         while (projectionMatcher != null && projectionMatcher.find()) {
             projIds.add(projectionMatcher.group());
         }
-        while (projectionMatcher != null && heightMatcher.find()) {
+        while (heightMatcher != null && heightMatcher.find()) {
             heightsIds.add(heightMatcher.group());
         }
 
@@ -496,6 +497,13 @@ public class Solver {
             result = triangle.getHypotenuse().getLength()*Math.sqrt(2)/2;
             sb.append("\n").append(triangle.getHypotenuse().getId()).append("*√2 = ").append(triangle.getHypotenuse().getLength()).append("*√2/2 = ").append(result);
         }
+        else if(!triangle.getProjections().isEmpty() && triangle.getProjections().getFirst().getLength() != 0){
+            measure = triangle.getProjections().getFirst().getMeasure();
+            sb.append("Знаходимо катети ").append(triangle.getLeg1().getId()).append(",").append(triangle.getLeg2().getId()).append(" через проекції гіпотенузи (").append(triangle.getProjections().getFirst().getId()).append(")");
+            sb.append("\n").append(triangle.getProjections().getFirst().getId()).append("*√2 = ");
+            result = triangle.getProjections().getFirst().getLength() * Math.sqrt(2);
+            sb.append(triangle.getProjections().getFirst().getLength()).append("*√2 = ").append(result).append(" ").append(measure);
+        }
         else System.out.println("Неможливо розв'язати задачу!");
 
         solution.add(sb.toString());
@@ -512,7 +520,8 @@ public class Solver {
         Pattern pattern = Pattern.compile(identifierRegex);
         Matcher hypotenuseMatcher = pattern.matcher(triangle.getHypotenuse().getId());
         Matcher legMatcher = pattern.matcher(triangle.getLeg1().getId());
-        Matcher heightMatcher = pattern.matcher(triangle.getHeights().getFirst().getId());
+        Matcher heightMatcher = null;
+        if(!triangle.getHeights().isEmpty()) heightMatcher = pattern.matcher(triangle.getHeights().getFirst().getId());
         Matcher projectionMatcher=null;
         if(!triangle.getProjections().isEmpty()) projectionMatcher = pattern.matcher(triangle.getProjections().getFirst().getId());
 
@@ -530,7 +539,7 @@ public class Solver {
         while (projectionMatcher != null && projectionMatcher.find()) {
             projIds.add(projectionMatcher.group());
         }
-        while (heightMatcher.find()) {
+        while (heightMatcher != null && heightMatcher.find()) {
             heightsIds.add(heightMatcher.group());
         }
 
@@ -554,7 +563,7 @@ public class Solver {
             else sb.append("! Знаходимо з-ння проекцій (").append(projIds.getFirst()).append(projIds.get(1)).append(") через катети ").append(triangle.getLeg1().getId()).append(": ");
 
             result = triangle.getLeg1().getLength()*Math.sqrt(2)/2;
-            sb.append("\n").append(triangle.getLeg1()).append("*√2/2 = ").append(triangle.getLeg1().getLength()).append("*√2/2 = ").append(result);
+            sb.append("\n").append(triangle.getLeg1().getId()).append("*√2/2 = ").append(triangle.getLeg1().getLength()).append("*√2/2 = ").append(result);
         }
         else System.out.println("Неможливо розв'язати задачу!");
 
