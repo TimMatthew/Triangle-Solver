@@ -573,6 +573,7 @@ public class DrawCommander {
         Segment newHeight = null;
         boolean isBuilt = false;
         boolean hasDigits = false;
+        String newMedianId = null;
         boolean hasDigits1 = false;
 
 
@@ -580,6 +581,7 @@ public class DrawCommander {
         for(String w: cond.split(" ")){
             if(w.matches("(([A-Z]\\d*){2})")){
                 identifier.append(w);
+                newMedianId = w;
                 newHeight = new Segment(identifier.toString(), "height-median-bisector");
                 isBuilt = true;
                 for(char c: w.toCharArray()){
@@ -726,7 +728,7 @@ public class DrawCommander {
             }
         }
 
-        if(idHeight==null && hasDigits) graphicsDescription.add("Провести висоту " + idHeightToDescribe + " до гіпотенузи " + idHypotenuse + ".");
+        if(idHeight==null && hasDigits) graphicsDescription.add("Провести висоту " + newMedianId + " до гіпотенузи " + idHypotenuse + ".");
         else if(hasDigits) graphicsDescription.add("Провести висоту " + idHeight + " до гіпотенузи " + idHypotenuse + ".");
         else graphicsDescription.add("Провести висоту " + identifier + " до гіпотенузи " + hypotenuse + ".");
     }

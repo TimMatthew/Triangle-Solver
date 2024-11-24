@@ -6,32 +6,25 @@ class SyntaxAnalyzer {
 
 <TEXT> ::= <SENTENCE_LIST> | #
 <SENTENCE_LIST> ::= <SENTENCE> | <SENTENCE> '.' <SENTENCE_LIST>
-<SENTENCE> ::= <POINT_ACTION> | <TRIANGLE_ACTION> | <LINE_ACTION>
-
-<POINT_ACTION> ::= "Познач(ити|те)" "точк(у|и)"  <POINT_LIST>
-<POINT_LIST> ::= <POINT> | <POINT> ',' <POINT_LIST>
-<POINT> ::= <ID> | <ID> "(із|з)" "координатами" <COORDINATE>
-<COORDINATE> ::= '(' <INT> ';' <INT> ')'
+<SENTENCE> ::= <TRIANGLE_ACTION> | <LINE_ACTION>
 
 <TRIANGLE_ACTION> ::= "Побуд(увати|йте|уй) " "трикутник(и) " <TRIANGLE_LIST>
 <TRIANGLE_LIST> ::= <TRIANGLE> | <TRIANGLE> ',' <TRIANGLE_LIST>
 <TRIANGLE> ::= <ID><ID><ID>
 
-<LINE_ACTION> ::= ("Прове(сти|діть|ди) ")  "висот(а|и)" <HEIGHT_LIST>
-                                           "медіан(а|и)" <MEDIAN_LIST>
-                                           "бісектрис(а|и)" <BISECTOR_LIST>
-                                           "відріз(ок|ки)" <SEGMENT_LIST>
+<LINE_ACTION> ::= ("Провести ")            "висоту(а|и|у)" <HEIGHT_LIST>      |
+                                           "медіан(а|и|у)" <MEDIAN_LIST>      |
+                                           "бісектрис(а|и|у)" <BISECTOR_LIST> |
+                                           "відрізок(а|и|у)" <SEGMENT_LIST>   |
 
 <HEIGHT_LIST> ::= <HEIGHT> | <HEIGHT> ',' <HEIGHT_LIST>
-<HEIGHT> ::= <ID><ID> "з " "кута " <ANGLE> "до " "сторони " <SEGMENT>
+<HEIGHT> ::= <ID><ID> "до " "сторони |гіпотенузи " <SEGMENT>
 
 <MEDIAN_LIST> ::= <MEDIAN> | <MEDIAN> ',' <MEDIAN_LIST>
-<HEIGHT> ::= <ID><ID> "з " "кута " <ANGLE> "до " "сторони " <SEGMENT>
-
-<ANGLE> ::= <ID> | <ID><ID><ID>
+<HEIGHT> ::= <ID><ID> "до " "сторони |катета " <SEGMENT>
 
 <BISECTOR_LIST> ::= <BISECTOR> | <BISECTOR> ',' <BISECTOR_LIST>
-<BISECTOR> ::= <ID><ID>
+<BISECTOR> ::= <ID><ID> "до " "сторони |катета " <SEGMENT>
 
 <SEGMENT_LIST> ::= <SEGMENT> | <SEGMENT> ',' <SEGMENT_LIST>
 <SEGMENT> ::= <ID><ID>
@@ -89,14 +82,12 @@ class SyntaxAnalyzer {
         return sentenceListNode;
     }
 
-    // <SENTENCE> ::= <POINT_ACTION> | <CIRCLE_ACTION> | <LINE_ACTION>
+    // <SENTENCE> ::= <TRIANGLE_ACTION> | <LINE_ACTION>
     private AST parseSentence() {
         AST node = null;
-        if (expect(LexicalAnalyzer.Token.ACTION_POINT)) {
-            node = parsePointAction();
-        }
-        else if (expect(LexicalAnalyzer.Token.ACTION_CIRCLE)) {
-            node = parseCircleAction();
+
+        if (expect(LexicalAnalyzer.Token.ACTION_TRIANGLE)) {
+            node = parseTriangleAction();
         }
         else if (expect(LexicalAnalyzer.Token.ACTION_LINE)) {
             node = parseLineAction();
@@ -105,154 +96,64 @@ class SyntaxAnalyzer {
         return node;
     }
 
-    // <POINT_ACTION> ::= "Познач(ити|те)" "точк(у|и)" <POINT_LIST>
-    private AST parsePointAction() {
-        AST pointActionNode = new AST("POINT_ACTION");
-        nextPair();
-        expect(LexicalAnalyzer.Token.POINT);
-        pointActionNode.addChild(parsePointList());
-        return pointActionNode;
-    }
-
-    // <POINT_LIST> ::= <POINT> | <POINT> ',' <POINT_LIST>
-    private AST parsePointList() {
-        AST pointListNode = new AST("POINT_LIST");
-        pointListNode.addChild(parsePoint());
-        if(currentPair.getToken() != LexicalAnalyzer.Token.DOT
-                && currentPair.getToken() != LexicalAnalyzer.Token.COMMA
-                && currentPair.getToken() != LexicalAnalyzer.Token.TEXT_END) nextPair();
-
-        while (expect(LexicalAnalyzer.Token.COMMA)) {
-            pointListNode.addChild(parsePoint());
-        }
-        return pointListNode;
-    }
-
-    // <POINT> ::= <ID> | <ID> "(із|з)" "координатами" <COORDINATE>
-    private AST parsePoint() {
-        AST pointNode = new AST("POINT");
-        nextPair();
-        expect(LexicalAnalyzer.Token.ID);
-        pointNode.addChild(new AST("ID", currentPair.getValue()));  // ID (e.g., "O")
-        nextPair();
-        if(expect(LexicalAnalyzer.Token.EXTRA)){
-                nextPair();
-                nextPair();
-                pointNode.addChild(parseCoordinate());
-        }
-        return pointNode;
-    }
-
-    // <COORDINATE> ::= '(' <INT> ';' <INT> ')'
-    private AST parseCoordinate() {
-        AST coordinateNode = new AST("COORDINATE");
-        expect(LexicalAnalyzer.Token.EXTRA);
-        nextPair();
-        expect(LexicalAnalyzer.Token.INT);
-        coordinateNode.addChild(new AST("INT", currentPair.getValue()));  // first INT
+//  <TRIANGLE_ACTION> ::= "Побуд(увати|йте|уй) " "рівнобедрений " "прямокутний " "трикутник(и) " <TRIANGLE_LIST>
+    private AST parseTriangleAction() {
+        AST triangleActionNode = new AST("TRIANGLE_ACTION");
         nextPair();
         expect(LexicalAnalyzer.Token.EXTRA);
         nextPair();
-        expect(LexicalAnalyzer.Token.INT);
-        coordinateNode.addChild(new AST("INT", currentPair.getValue()));  // second INT
-        nextPair();
         expect(LexicalAnalyzer.Token.EXTRA);
         nextPair();
-        return coordinateNode;
+        expect(LexicalAnalyzer.Token.TRIANGLE);
+        triangleActionNode.addChild(parseTriangleList());
+        return triangleActionNode;
     }
 
-    // <CIRCLE_ACTION> ::= "Побуд(увати|йте|уй)" "кол(о|а)" "(із|з)" "центр(ом|ами)" <CIRCLE_LIST>
-    private AST parseCircleAction() {
-        AST circleActionNode = new AST("CIRCLE_ACTION");
-        nextPair();
-        expect(LexicalAnalyzer.Token.CIRCLE);
-        nextPair();
-        expect(LexicalAnalyzer.Token.EXTRA);
-        nextPair();
-        expect(LexicalAnalyzer.Token.POINT);
-        circleActionNode.addChild(parseCircleList());
-        return circleActionNode;
-    }
-
-    // <CIRCLE_LIST> ::= <CIRCLE> | <CIRCLE> ',' <CIRCLE_LIST>
-    private AST parseCircleList() {
-        AST circleListNode = new AST("CIRCLE_LIST");
-        circleListNode.addChild(parseCircle());
+    // <TRIANGLE_LIST> ::= <TRIANGLE> | <TRIANGLE> ',' <TRIANGLE_LIST>
+    private AST parseTriangleList() {
+        AST triangleListNode = new AST("TRIANGLE_LIST");
+        triangleListNode.addChild(parseTriangle());
         if(currentPair.getToken() != LexicalAnalyzer.Token.DOT
                 && currentPair.getToken() != LexicalAnalyzer.Token.COMMA
                 && currentPair.getToken() != LexicalAnalyzer.Token.TEXT_END) nextPair();
         while (expect(LexicalAnalyzer.Token.COMMA))
-            circleListNode.addChild(parseCircle());
+            triangleListNode.addChild(parseTriangle());
 
-        return circleListNode;
+        return triangleListNode;
     }
 
-    // <CIRCLE> ::= <ID> | <ID> "з" "радіусом" <INT>
-    private AST parseCircle() {
-        AST circleNode = new AST("CIRCLE");
+    // <TRIANGLE> ::= <ID><ID><ID>
+    private AST parseTriangle() {
+        AST triangleNode = new AST("TRIANGLE");
         nextPair();
         expect(LexicalAnalyzer.Token.ID);
-        circleNode.addChild(new AST("ID", currentPair.getValue()));  // ID (e.g., "O")
+        triangleNode.addChild(new AST("ID", currentPair.getValue()));
         nextPair();
-        if (expect(LexicalAnalyzer.Token.EXTRA)) {
-            nextPair();
-            expect(LexicalAnalyzer.Token.RADIUS);
-            nextPair();
-            expect(LexicalAnalyzer.Token.INT);
-            if(Integer.parseInt(currentPair.getValue()) < 0)
-                currentPair.setValue(currentPair.getValue().replace("-", ""));
-            circleNode.addChild(new AST("INT", currentPair.getValue()));  // INT (e.g., radius)
-            nextPair();
-        }
-        return circleNode;
+        expect(LexicalAnalyzer.Token.ID);
+        triangleNode.addChild(new AST("ID", currentPair.getValue()));
+        nextPair();
+        expect(LexicalAnalyzer.Token.ID);
+        triangleNode.addChild(new AST("ID", currentPair.getValue()));
+        nextPair();
+        return triangleNode;
     }
 
 
-//     <LINE_ACTION> ::= ("Прове(сти|діть|ди) ") ("хорд(а|и)" <CHORD_LIST> |
-//                                                       "діаметр(и)" <DIAMETER_LIST> |
-//                                                       "радіус(и)" <RADIUS_LIST> |
-//                                                       "відріз(ок|ки)" <SEGMENT_LIST>)
+/*
+    <LINE_ACTION> ::= ("Провести ")     "висоту(а|и|у)" <HEIGHT_LIST>      |
+                                        "медіан(а|и|у)" <MEDIAN_LIST>      |
+                                        "бісектрис(а|и|у)" <BISECTOR_LIST> |
+ */
     private AST parseLineAction() {
         AST lineActionNode = new AST("LINE_ACTION");
         nextPair();
-
-        if (expect(LexicalAnalyzer.Token.RADIUS)) lineActionNode.addChild(parseRadiusList());
-        else if (expect(LexicalAnalyzer.Token.DIAMETER)) lineActionNode.addChild(parseDiameterList());
-        else if (expect(LexicalAnalyzer.Token.CHORD)) lineActionNode.addChild(parseChordList());
-        else if (expect(LexicalAnalyzer.Token.SEGMENT)) lineActionNode.addChild(parseSegmentList());
-
+        if (expect(LexicalAnalyzer.Token.SEGMENT)) lineActionNode.addChild(parseSegmentList());
+        else if(expect(LexicalAnalyzer.Token.HEIGHT)) lineActionNode.addChild(parseHeightList());
+        else if(expect(LexicalAnalyzer.Token.MEDIAN)) lineActionNode.addChild(parseMedianList());
+        else if(expect(LexicalAnalyzer.Token.BISECTOR)) lineActionNode.addChild(parseBisectorList());
 
         return lineActionNode;
     }
-
-
-    //  <RADIUS_LIST> ::=  <RADIUS> | <RADIUS> ',' <RADIUS_LIST>
-
-    private AST parseRadiusList() {
-        AST radiusListNode = new AST("RADIUS_LIST");
-        radiusListNode.addChild(parseRadius());
-
-        if(currentPair.getToken() != LexicalAnalyzer.Token.DOT && currentPair.getToken() != LexicalAnalyzer.Token.COMMA) nextPair();
-        while(expect(LexicalAnalyzer.Token.COMMA)){
-           radiusListNode.addChild(parseRadius());
-        }
-        return radiusListNode;
-    }
-
-    //  <RADIUS> ::= <ID><ID>
-    private AST parseRadius() {
-        AST radiusNode = new AST("RADIUS");
-        if(currentPair.getToken() != LexicalAnalyzer.Token.ID)
-            nextPair();
-        expect(LexicalAnalyzer.Token.ID);
-        radiusNode.addChild(new AST("ID", currentPair.getValue()));
-        nextPair();
-        expect(LexicalAnalyzer.Token.ID);
-        radiusNode.addChild(new AST("ID", currentPair.getValue()));
-        nextPair();
-        return radiusNode;
-    }
-
 
 /*<SEGMENT_LIST> ->  <SEGMENT> | (<SEGMENT> ',' "відріз(ок|ки)" <SEGMENT_LIST>)*/
     private AST parseSegmentList() {
@@ -281,80 +182,107 @@ class SyntaxAnalyzer {
         return segmentNode;
     }
 
-
-/*<CHORD_LIST> ::= <CHORD> | <CHORD> ',' "хорд(а|и)" <CHORD_LIST>*/
-    private AST parseChordList() {
-
-        AST chordListNode = new AST("CHORD_LIST");
-        chordListNode.addChild(parseChord());
+/*<HEIGHT_LIST> ::= <HEIGHT> | <HEIGHT> ',' <HEIGHT_LIST>*/
+    private AST parseHeightList() {
+        AST heightListNode = new AST("HEIGHT_LIST");
+        heightListNode.addChild(parseHeight());
 
         if(currentPair.getToken() != LexicalAnalyzer.Token.DOT && currentPair.getToken() != LexicalAnalyzer.Token.COMMA
                 && currentPair.getToken() != LexicalAnalyzer.Token.TEXT_END) nextPair();
-        while (expect(LexicalAnalyzer.Token.COMMA)) {
-            chordListNode.addChild(parseChord());
+        while(expect(LexicalAnalyzer.Token.COMMA)){
+            heightListNode.addChild(parseHeight());
         }
-
-        return chordListNode;
+        return heightListNode;
     }
 
-//  <CHORD> ::= <ID><ID> "на" "колі" <ID>
-    private AST parseChord() {
-
-        AST chordNode = new AST("CHORD");
+/*<HEIGHT> ::= <ID><ID> "до " "сторони |гіпотенузи " <SEGMENT>*/
+    private AST parseHeight() {
+        AST segmentNode = new AST("HEIGHT");
         if(currentPair.getToken() != LexicalAnalyzer.Token.ID)
             nextPair();
+
         expect(LexicalAnalyzer.Token.ID);
-        chordNode.addChild(new AST("ID", currentPair.getValue()));
+        segmentNode.addChild(new AST("ID", currentPair.getValue()));
         nextPair();
         expect(LexicalAnalyzer.Token.ID);
-        chordNode.addChild(new AST("ID", currentPair.getValue()));
+        segmentNode.addChild(new AST("ID", currentPair.getValue()));
         nextPair();
         expect(LexicalAnalyzer.Token.EXTRA);
         nextPair();
         expect(LexicalAnalyzer.Token.EXTRA);
-        nextPair();
-        expect(LexicalAnalyzer.Token.CIRCLE);
-        chordNode.addChild(new AST("CIRCLE_ID", currentPair.getValue()));
-        nextPair();
-        return chordNode;
+        segmentNode.addChild(parseSegment());
+
+        return segmentNode;
     }
 
-
-/*
-<DIAMETER_LIST> ::= <DIAMETER> | (<DIAMETER> ',' "діаметр(и)" <DIAMETER_LIST>)
-*/
-    private AST parseDiameterList() {
-        AST diameterListNode = new AST("DIAMETER_LIST");
-        diameterListNode.addChild(parseDiameter());
+    /*<MEDIAN_LIST> ::= <MEDIAN> | <MEDIAN> ',' <MEDIAN_LIST>*/
+    private AST parseMedianList() {
+        AST medianListNode = new AST("MEDIAN_LIST");
+        medianListNode.addChild(parseMedian());
 
         if(currentPair.getToken() != LexicalAnalyzer.Token.DOT && currentPair.getToken() != LexicalAnalyzer.Token.COMMA
                 && currentPair.getToken() != LexicalAnalyzer.Token.TEXT_END) nextPair();
-        while (expect(LexicalAnalyzer.Token.COMMA)) {
-            diameterListNode.addChild(parseDiameter());
+        while(expect(LexicalAnalyzer.Token.COMMA)){
+            medianListNode.addChild(parseMedian());
         }
-
-        return diameterListNode;
+        return medianListNode;
     }
 
-//    <DIAMETER> ::= <ID><ID> "на" "колі" <ID>
-    private AST parseDiameter() {
-
-        AST diameterNode = new AST("DIAMETER");
+    /*<MEDIAN> ::= <ID><ID> "до " "сторони |гіпотенузи " <SEGMENT>*/
+    private AST parseMedian() {
+        AST medianNode = new AST("MEDIAN");
         if(currentPair.getToken() != LexicalAnalyzer.Token.ID)
             nextPair();
+
         expect(LexicalAnalyzer.Token.ID);
-        diameterNode.addChild(new AST("ID", currentPair.getValue()));
+        medianNode.addChild(new AST("ID", currentPair.getValue()));
         nextPair();
         expect(LexicalAnalyzer.Token.ID);
-        diameterNode.addChild(new AST("ID", currentPair.getValue()));
+        medianNode.addChild(new AST("ID", currentPair.getValue()));
         nextPair();
         expect(LexicalAnalyzer.Token.EXTRA);
         nextPair();
-        expect(LexicalAnalyzer.Token.CIRCLE);
+        expect(LexicalAnalyzer.Token.EXTRA);
         nextPair();
-        diameterNode.addChild(new AST("CIRCLE_ID", currentPair.getValue()));
-        nextPair();
-        return diameterNode;
+        expect(LexicalAnalyzer.Token.SEGMENT);
+        medianNode.addChild(parseSegment());
+
+        return medianNode;
     }
 
+    /*<BISECTOR_LIST> ::= <BISECTOR> | <BISECTOR> ',' <BISECTOR_LIST>*/
+    private AST parseBisectorList() {
+        AST bisectorListNode = new AST("BISECTOR_LIST");
+        bisectorListNode.addChild(parseBisector());
+
+        if(currentPair.getToken() != LexicalAnalyzer.Token.DOT && currentPair.getToken() != LexicalAnalyzer.Token.COMMA
+                && currentPair.getToken() != LexicalAnalyzer.Token.TEXT_END) nextPair();
+        while(expect(LexicalAnalyzer.Token.COMMA)){
+            bisectorListNode.addChild(parseBisector());
+        }
+        return bisectorListNode;
+    }
+
+    /*<BISECTOR> ::= <ID><ID> "до " "сторони |катета " <SEGMENT>*/
+    private AST parseBisector() {
+        AST bisectorNode = new AST("BISECTOR");
+        if(currentPair.getToken() != LexicalAnalyzer.Token.ID)
+            nextPair();
+
+        expect(LexicalAnalyzer.Token.ID);
+        bisectorNode.addChild(new AST("ID", currentPair.getValue()));
+        nextPair();
+        expect(LexicalAnalyzer.Token.ID);
+        bisectorNode.addChild(new AST("ID", currentPair.getValue()));
+        nextPair();
+        expect(LexicalAnalyzer.Token.EXTRA);
+        nextPair();
+        expect(LexicalAnalyzer.Token.EXTRA);
+        nextPair();
+        expect(LexicalAnalyzer.Token.SEGMENT);
+        bisectorNode.addChild(parseSegment());
+        nextPair();
+
+        return bisectorNode;
+    }
 }

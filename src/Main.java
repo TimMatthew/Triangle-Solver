@@ -98,33 +98,37 @@ public class Main {
         ArrayList<String> graphicsDescription = dc.getGraphicsDescription();
 
         StringBuilder textForLexer = new StringBuilder();
-        for(String s: graphicsDescription){
-            textForLexer.append(s).append("\n");
+        for(int i=0; i<graphicsDescription.size(); i++){
+            if(i==graphicsDescription.size()-1){
+                String lastSentence = graphicsDescription.get(i).replace(".", "");
+                textForLexer.append(lastSentence).append("#");
+            }
+            else textForLexer.append(graphicsDescription.get(i)).append("\n");
         }
 
         System.out.println(textForLexer);
 
 
-//        // Лексичний аналіз
-//        LexicalAnalyzer la = new LexicalAnalyzer();
-//        List<Pair> tokens = la.analyze(task);
-//
-//        for (Pair pair : tokens) {
-//            System.out.println(pair);
-//        }
-//
-//        // Синтаксичний та семантичний аналіз
-//        SyntaxAnalyzer sa = new SyntaxAnalyzer(tokens);
-//        AST ast = sa.parse();
-//
-//        System.out.println(ast);
-//
-//
-//        // Запис дерева у команди
-//        ASTRecorder recorder = new ASTRecorder(ast);
-//        String geomCommands = recorder.recordAST();
-//
-//        recorder.saveToFile("commands\\commands"+i+".txt", geomCommands);
+        // Лексичний аналіз
+        LexicalAnalyzer la = new LexicalAnalyzer();
+        List<Pair> tokens = la.analyze(textForLexer.toString());
+
+        for (Pair pair : tokens) {
+            System.out.println(pair);
+        }
+
+
+        // Синтаксичний та семантичний аналіз
+        SyntaxAnalyzer sa = new SyntaxAnalyzer(tokens);
+        AST ast = sa.parse();
+
+        System.out.println(ast);
+
+        // Запис дерева у команди
+        ASTRecorder recorder = new ASTRecorder(ast);
+        String geomCommands = recorder.recordAST();
+
+        recorder.saveToFile("commands\\commands"+taskNumber+".txt", geomCommands);
 //
 //        // Виконання задач
 //        GraphicWindow window = GraphicWindow.createAndShowGUI();
