@@ -45,8 +45,6 @@ public class DrawCommander {
                 isTriangleBuilt = true;
             }
 
-
-
             if(!isTriangleBuilt && condition.contains("трикутник")){
                 for(String s : conditionSplit){
                     if(s.matches("(([A-Z]\\d*){3})")){

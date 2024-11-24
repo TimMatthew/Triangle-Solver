@@ -1,20 +1,21 @@
 import javax.swing.*;
 import java.awt.*;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Random;
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class GraphicWindow extends JPanel {
-
-    public static final int MAX_ABSCISSA = 30;
-    public static final int MAX_ORDINATE = 25;
-    private static final int STEP_SIZE = 20;
-    private static final int VALUE_STEP = 5;
     private static final int WINDOW_HEIGHT = 800;
     private static final int WINDOW_WIDTH = 1200;
 
     String[] commands;
     ArrayList<Shape> idTable;
+    RightIsoscelessTriangle mainShape;
+
+    public void setMainShape(Shape mainShape) {
+        this.mainShape = (RightIsoscelessTriangle) mainShape;
+    }
 
     public void setCommands(String[] commands) {
         this.commands = commands;
@@ -23,298 +24,107 @@ public class GraphicWindow extends JPanel {
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
-        drawCartesianGrid(g);
-        executeCommands(g, commands);
+        idTable = new ArrayList<>();
+        executeCommands(g);
     }
 
-    public void executeCommands(Graphics g, String[] commands) {
-        idTable = new ArrayList<>();
+    public void executeCommands(Graphics g) {
+
+        boolean triangleIsBuilt = false;
+        String triangleCommand = "";
         for(String command : commands){
+            if(command.contains("Triangle")) triangleCommand = command;
+        }
 
-            if(command.contains("Point")){
-
-                String[] pointParams = extractParameters(command);
-                boolean exists = false;
-
-                for(Shape s : idTable){
-                    if(s.getId().equals(pointParams[0])){
-                        exists=true;
-                        break;
-                    }
-                }
-                if(!exists) operatePoint(g, pointParams[0], Integer.parseInt(pointParams[1]), Integer.parseInt(pointParams[2]));
+        for(String command : commands){
+            if(command.contains("Triangle")){
+                drawRightIsoscelesTriangle(g, extractParameters(command));
+                triangleIsBuilt = true;
             }
-
-//            else if (command.contains("Circle")) {
-//
-//                String[] circleParams = extractParameters(command);
-//                Circle newCircle;
-//                boolean exists = false;
-//
-//                for (Shape s : idTable) {
-//                    if (s.getId().equals(circleParams[0] + circleParams[1])) {
-//                        exists = true;
-//                        break;
-//                    }
-//                }
-//
-//                if (!exists) {
-//
-//                    Point potentialCenter = null;
-//                    boolean circleIsDrawn = false;
-//                    String pointCommand = null;
-//
-//                    for (String c : commands) {
-//                        if (c.contains("Point")) {
-//                            String[] params = extractParameters(c);
-//                            if (Arrays.asList(params).contains(circleParams[0])){
-//                                pointCommand = c;
-//                                break;
-//                            }
-//                        }
-//                    }
-//
-//                    for (Shape s : idTable) {
-//                        if (s instanceof Circle && s.getId().equals(circleParams[0])) circleIsDrawn = true;
-//                        else if (s instanceof Point && s.getId().equals(circleParams[0])) potentialCenter = (Point) s;
-//                    }
-//
-//                    if (potentialCenter == null && !circleIsDrawn) {
-//
-//                        if (pointCommand != null) {
-//                            String[] pointParams = extractParameters(pointCommand);
-//                            potentialCenter = operatePoint(g, pointParams[0], Integer.parseInt(pointParams[1]), Integer.parseInt(pointParams[2]));
-//                            newCircle = new Circle(circleParams[0], potentialCenter, Integer.parseInt(circleParams[1]));
-//                            drawCircle(g, newCircle);
-//                            idTable.add(newCircle);
-//                        } else {
-//                            Random random = new Random();
-//                            int generatedX = random.nextInt(-MAX_ABSCISSA, MAX_ABSCISSA + 1);
-//                            int generatedY = random.nextInt(-MAX_ORDINATE, MAX_ORDINATE + 1);
-//
-//                            potentialCenter = operatePoint(g, circleParams[0], generatedX, generatedY);
-//                            newCircle = new Circle(circleParams[0], potentialCenter, Integer.parseInt(circleParams[1]));
-//                            drawCircle(g, newCircle);
-//                            idTable.add(newCircle);
-//                        }
-//                    } else if (potentialCenter != null && !circleIsDrawn) {
-//
-//                        int scaledRadius = scaleRadius(Integer.parseInt(circleParams[1]));
-//                        newCircle = new Circle(circleParams[0], potentialCenter, scaledRadius);
-//                        drawCircle(g, newCircle);
-//                        idTable.add(newCircle);
-//                    }
-//                }
-//            }
-//            else if(command.contains("Radius")){
-//
-//                String[] radiusParams = extractParameters(command);
-//                Radius newRadius;
-//                boolean exists=false;
-//
-//                for(Shape s : idTable){
-//                    if(s.getId().equals(radiusParams[0]+radiusParams[1])){
-//                        exists=true;
-//                        break;
-//                    }
-//                }
-//
-//                if(!exists){
-//                    Point center = null, end = null;
-//                    Circle adjacentCircle = null;
-//                    boolean centerExists=false;
-//                    boolean endExists=false;
-//                    Random random;
-//
-//                    String[] centerParams = null, endParams = null, circleParams = null;
-//
-//
-//
-//                    for(String c : commands){
-//                        if(c.contains("Point")){
-//                            String[] params = extractParameters(c);
-//
-//                            if (Arrays.asList(params).contains(radiusParams[0])){
-//                                centerParams = extractParameters(c);
-//                            }
-//                            else if(Arrays.asList(params).contains(radiusParams[1])){
-//                                endParams = extractParameters(c);
-//                            }
-//                        }
-//
-//                        else if(c.contains("Circle")){
-//                            String[] params = extractParameters(c);
-//                            if(Arrays.asList(params).contains(radiusParams[2])) {
-//                                circleParams = extractParameters(c);
-//                            }
-//                        }
-//                    }
-//
-//                    for(Shape s : idTable){
-//
-//                        if(s instanceof Point) {
-//                            if(s.getId().equals(radiusParams[0])){
-//                                centerExists = true;
-//                                center = (Point) s;
-//                            }
-//                            else if(s.getId().equals(radiusParams[1])){
-//                                endExists = true;
-//                                end = (Point) s;
-//                            }
-//                        }
-//                        else if (s instanceof Circle && s.getId().equals(radiusParams[0])) {
-//                            adjacentCircle = (Circle) s;
-//                        }
-//                    }
-//
-//                    if(!centerExists){
-//
-//                        if(centerParams!=null){
-//                            center = new Point(centerParams[0], Integer.parseInt(centerParams[1]), Integer.parseInt(centerParams[2]));
-//                        }
-//                        else{
-//                            random = new Random();
-//                            int centerX = random.nextInt(-MAX_ABSCISSA, MAX_ABSCISSA+1);
-//                            int centerY = random.nextInt(-MAX_ABSCISSA, MAX_ABSCISSA+1);
-//                            center = new Point(radiusParams[0], centerX, centerY);
-//                        }
-//                        drawPoint(g, center.getX(), center.getY(), center.getId());
-//                        idTable.add(center);
-//                    }
-//                    if(!endExists){
-//
-//                        if(endParams!=null) {
-//                            end = new Point(endParams[0], Integer.parseInt(endParams[1]), Integer.parseInt(endParams[2]));
-//                        }
-//                        else{
-//                            random = new Random();
-//                            int endX = random.nextInt(-MAX_ABSCISSA, MAX_ABSCISSA+1);
-//                            int endY = random.nextInt(-MAX_ABSCISSA, MAX_ABSCISSA+1);
-//                            end = new Point(radiusParams[0], endX, endY);
-//                        }
-//                        drawPoint(g, end.getX(), end.getY(), end.getId());
-//                        idTable.add(end);
-//                    }
-//
-//                    if(adjacentCircle==null){
-//
-//                        if(circleParams!=null){
-//                            adjacentCircle = new Circle(circleParams[0], center, Integer.parseInt(circleParams[1]));
-//                        }
-//                        else{
-//                            int radius = (int) Math.round(Math.sqrt(Math.abs(Math.pow(end.getX()-center.getX(),2)+(Math.pow(end.getY()-center.getY(),2)))));
-//                            adjacentCircle = new Circle(center.getId(), center, radius);
-//                        }
-//
-//                        drawCircle(g, adjacentCircle);
-//                        idTable.add(adjacentCircle);
-//                    }
-//
-//                    newRadius = new Radius(radiusParams[0]+radiusParams[1], center, end, adjacentCircle);
-//                    if(drawRadius(g, newRadius))
-//                        idTable.add(newRadius);
-//                }
-//            }
-            else if(command.contains("Segment")){
-                String[] segmentParams = extractParameters(command);
-                Segment newSegment;
-                boolean exists = false;
-                Random random;
-
-                for (Shape s : idTable) {
-                    if (s.getId().equals(segmentParams[0] + segmentParams[1])) {
-                        exists = true;
-                        break;
-                    }
+            else if(command.contains("Height")){
+                if(!triangleIsBuilt){
+                    drawRightIsoscelesTriangle(g, extractParameters(triangleCommand));
+                    triangleIsBuilt = true;
                 }
-
-                if (!exists) {
-                    Point start = null, end=null;
-                    boolean startExists = false, endExists = false;
-
-                    String[] startParams = null, endParams = null;
-
-                    for (String c : commands) {
-                        if (c.contains("Point")) {
-                            String[] params = extractParameters(c);
-                            if (Arrays.asList(params).contains(segmentParams[0])){
-                                startParams = extractParameters(c);
-                                startExists=true;
-                            }
-                            if (Arrays.asList(params).contains(segmentParams[1])){
-                                endParams = extractParameters(c);
-                                endExists=true;
-                            }
-                        }
-                    }
-
-                    for (Shape s : idTable) {
-
-                        if (s instanceof Point)
-                        {
-                            if (s.getId().equals(segmentParams[0])) {
-                                start = (Point) s;
-                            }
-                            else if (s.getId().equals(segmentParams[1])) {
-                                end = (Point) s;
-                            }
-                        }
-                    }
-
-                    if(!startExists){
-
-                        if(startParams!=null){
-                            start = new Point(startParams[0], Integer.parseInt(startParams[1]), Integer.parseInt(startParams[2]));
-                        }
-                        else{
-                            random = new Random();
-
-                            int startX = random.nextInt(-MAX_ABSCISSA, MAX_ABSCISSA+1);
-                            int startY = random.nextInt(-MAX_ABSCISSA, MAX_ABSCISSA+1);
-                            start = new Point(segmentParams[0], startX, startY);
-                        }
-                        drawPoint(g, start.getX(), start.getY(), start.getId());
-                        idTable.add(start);
-                    }
-
-                    if(!endExists){
-
-                        if(endParams!=null){
-                            end = new Point(endParams[0], Integer.parseInt(endParams[1]), Integer.parseInt(endParams[2]));
-                        }
-                        else{
-                            random = new Random();
-
-                            int endX = random.nextInt(-MAX_ABSCISSA, MAX_ABSCISSA+1);
-                            int endY = random.nextInt(-MAX_ABSCISSA, MAX_ABSCISSA+1);
-                            end = new Point(segmentParams[0], endX, endY);
-                        }
-                        drawPoint(g, end.getX(), end.getY(), end.getId());
-                        idTable.add(end);
-                    }
-
-                    newSegment = new Segment(segmentParams[0]+segmentParams[1], start, end);
-                    drawSegment(g, newSegment);
-                    idTable.add(newSegment);
+                drawHeight(g, extractParameters(command));
+            }
+            else if(command.contains("Median")){
+                if(!triangleIsBuilt){
+                    drawRightIsoscelesTriangle(g, extractParameters(triangleCommand));
+                    triangleIsBuilt = true;
                 }
+                drawMedian(g, extractParameters(command));
             }
         }
+
     }
 
-    private int scaleRadius(int radius) {
-        int maxRadius = Math.min(WINDOW_HEIGHT / 2, MAX_ABSCISSA);
-        return Math.min(radius, maxRadius);
-    }
-    private int scaleCoordinate(int coordinate, int maxCoordinate, int windowSize) {
-        return (int) ((double) coordinate / maxCoordinate * windowSize);
+    private void drawHeight(Graphics g, String[] ids) {
+        String heightParams = ids[0];
+        String oppositeSideParams = ids[1];
+
+        Point pointFrom = null;
+        Point opposite1 = null, opposite2 = null;
+
+        String heightPoint1ID, heightPoint2ID;
+        String identifierRegex = "([A-Z]\\d*)";
+        Pattern pattern = Pattern.compile(identifierRegex);
+        Matcher heightMatcher = pattern.matcher(heightParams);
+        Matcher oppositeMatcher = pattern.matcher(oppositeSideParams);
+        List<String> groupedIds = new ArrayList<>();
+
+        while (heightMatcher.find()) {
+            groupedIds.add(heightMatcher.group());
+        }
+        while (oppositeMatcher.find()) {
+            groupedIds.add(oppositeMatcher.group());
+        }
+        heightPoint1ID = groupedIds.getFirst();
+        heightPoint2ID = groupedIds.get(1);
+
+
+
+        for (Shape s : idTable) {
+            if (s instanceof Point p && p.getId().equals(String.valueOf(heightPoint1ID))) {
+                pointFrom = p;
+            } else if (s instanceof Segment sg && sg.getId().equals(oppositeSideParams)) {
+                opposite1 = sg.getStart();
+                opposite2 = sg.getEnd();
+            }
+        }
+
+        int x3 = pointFrom.getX(), y3 = pointFrom.getY();
+        int x1 = opposite1.getX(), y1 = opposite1.getY();
+        int x2 = opposite2.getX(), y2 = opposite2.getY();
+
+        double dx = x2 - x1;
+        double dy = y2 - y1;
+        double dSquared = dx * dx + dy * dy;
+        double t = ((x3 - x1) * dx + (y3 - y1) * dy) / dSquared;
+
+        int perpX = (int) Math.round(x1 + t * dx);
+        int perpY = (int) Math.round(y1 + t * dy);
+
+        Point pointTo = new Point(heightPoint2ID, perpX, perpY);
+        Segment newHeight = new Segment(heightPoint1ID+heightPoint2ID, pointFrom, pointTo);
+
+        double lengthHeight = 0;
+        String measureHeight = null;
+
+        for(Segment s : mainShape.getHeights()){
+            if(s.getId().equals(heightParams) && s.getSegmentType().equals("height-median-bisector")){
+                lengthHeight = s.getLength();
+                measureHeight = s.getMeasure();
+            }
+        }
+
+        drawSegment(g, newHeight.getStart(), newHeight.getEnd(), lengthHeight, measureHeight, 50, 0);
+        drawPoint(g, perpX, perpY, perpX+10,perpY, pointTo.getId());
+        g.drawLine(pointTo.getX()-14, pointTo.getY()-14, pointTo.getX()-28, pointTo.getY());
+        g.drawLine(pointTo.getX()-28, pointTo.getY(), pointTo.getX()-14, pointTo.getY()+14);
+        idTable.add(newHeight);
     }
 
-    private Point operatePoint(Graphics g, String id, int x, int y) {
-        Point test = new Point(id, x, y);
-        drawPoint(g, test.getX(), test.getY(), test.getId());
-        idTable.add(test);
-        return test;
-    }
 
     private String[] extractParameters(String command) {
         int startIndex = command.indexOf('(') + 1;
@@ -325,100 +135,151 @@ public class GraphicWindow extends JPanel {
         return paramString.split(",");
     }
 
-    private void drawPoint(Graphics g, int x, int y, String id) {
-        int coordX = getWidth() / 2 + x * STEP_SIZE;
-        int coordY = getHeight() / 2 - y * STEP_SIZE;
-        g.setColor(Color.BLACK);
-        g.fillOval(coordX - 5, coordY - 5, 10, 10);
-        g.setFont(new Font("Arial Black", Font.PLAIN, 14));
-        g.drawString(id, coordX + 5, coordY - 5);
+    private void drawRightIsoscelesTriangle(Graphics g, String[] pointIds){
+
+        Point point1 = new Point(pointIds[0], 400, 180);
+        Point point2 = new Point(pointIds[1], 400, 500);
+        Point point3 = new Point(pointIds[2], 700, 500);
+
+        idTable.add(point1);
+        idTable.add(point2);
+        idTable.add(point3);
+
+        drawPoint(g, point1.getX(), point1.getY(), point1.getX()+5, point1.getY()-5, point1.getId());
+        drawPoint(g, point2.getX(), point2.getY(), point2.getX() - 16, point2.getY() + 28, point2.getId());
+        drawPoint(g, point3.getX(), point3.getY(), point3.getX() - 16, point3.getY() + 28, point3.getId());
+
+        Segment leg1 = new Segment(point1.getId()+point2.getId(), point1, point2);
+        Segment leg2 = new Segment(point2.getId()+point3.getId(), point2, point3);
+        Segment hypotenuse = new Segment(point1.getId()+point3.getId(), point1, point3);
+
+        idTable.add(leg1);
+        idTable.add(leg2);
+        idTable.add(hypotenuse);
+
+        double lengthLeg1 = mainShape.getLeg1().getLength();
+        String measureLeg1 = mainShape.getLeg1().getMeasure();
+
+        double lengthLeg2 = mainShape.getLeg2().getLength();
+        String measureLeg2 = mainShape.getLeg2().getMeasure();
+
+        double lengthHypotenuse = mainShape.getHypotenuse().getLength();
+        String measureHypotenuse = mainShape.getHypotenuse().getMeasure();
+
+        drawSegment(g, point1, point2, lengthLeg1, measureLeg1, 130, 10);
+        drawSegment(g, point2, point3, lengthLeg2, measureLeg2, 20, -30);
+        drawSegment(g, point1, point3, lengthHypotenuse, measureHypotenuse, -20, 10);
+
+        drawSegment(g, new Point("", point2.getX(), point2.getY()-20), new Point("", point2.getX()+20, point2.getY()-20), 0, "", 0,0);
+        drawSegment(g, new Point("", point2.getX()+20, point2.getY()-20), new Point("", point2.getX()+20, point2.getY()), 0, "",0,0);
+
+        if(!mainShape.getProjections().isEmpty()){
+            double lengthProjection1 = mainShape.getProjections().getFirst().getLength();
+            String measureProjection1 = mainShape.getProjections().getFirst().getMeasure();
+
+            double lengthProjection2 = mainShape.getProjections().get(1).getLength();
+            String measureProjection2 = mainShape.getProjections().get(1).getMeasure();
+
+            drawSegment(g, new Point("", point1.getX(),point1.getY()), new Point("", point1.getX(),point1.getY()), lengthProjection1, measureProjection1, -70, -70);
+            drawSegment(g, new Point("", point3.getX(),point3.getY()), new Point("", point3.getX(),point3.getY()), lengthProjection2, measureProjection2, 60, 70);
+        }
     }
 
-//    private void drawCircle(Graphics g, Circle circle){
-//
-//        int x = circle.getCenter().getX();
-//        int y = circle.getCenter().getY();
-//        int radius = circle.getRadius();
-//
-//        int coordX = getWidth() / 2 + x * STEP_SIZE;
-//        int coordY = getHeight() / 2 - y * STEP_SIZE;
-//        int coordRadius = radius * STEP_SIZE * 2;
-//
-//        Graphics2D g2d = (Graphics2D) g;
-//        g2d.setStroke(new BasicStroke(2.0f));
-//        g.drawOval(coordX-coordRadius/2, coordY-coordRadius/2, coordRadius, coordRadius);
-//    }
+    private void drawPoint(Graphics g, int x, int y, int offsetX, int offsetY, String id) {
+        g.setColor(Color.BLACK);
+        g.fillOval(x - 8, y - 8, 16, 16);
+        g.setFont(new Font("Arial Black", Font.PLAIN, 24));
+        g.drawString(id, offsetX, offsetY);
+    }
 
-    private void drawSegment(Graphics g, Segment segment) {
-
-
-        int coordStartX = getWidth() / 2 + segment.getStart().getX() * STEP_SIZE;
-        int coordStartY = getHeight() / 2 - segment.getStart().getY() * STEP_SIZE;
-        int coordEndX = getWidth() / 2 + segment.getEnd().getX() * STEP_SIZE;
-        int coordEndY =  getHeight() / 2 - segment.getEnd().getY() * STEP_SIZE;
+    private void drawSegment(Graphics g, Point start, Point end, double length, String measure, int lengthOffsetX, int lengthOffsetY, int measureOffsetX, int measureOffsetY) {
 
         Graphics2D g2d = (Graphics2D) g;
-        g2d.setStroke(new BasicStroke(2.0f));
+        g2d.setStroke(new BasicStroke(3.4f));
         g.setColor(Color.BLACK);
-        g.drawLine(coordStartX, coordStartY, coordEndX, coordEndY);
+        g.drawLine(start.getX(), start.getY(), end.getX(), end.getY());
+
+        int midX = (start.getX() + end.getX()) / 2;
+        int midY = (start.getY() + end.getY()) / 2;
+
+        if (length != 0) {
+            g.drawString(String.format("%.2f", length), midX-measureOffsetX, midY - measureOffsetY);
+
+            if (measure != null && !measure.isEmpty()) {
+                g.drawString(measure, midX-measureOffsetX+80, midY - measureOffsetY);
+            }
+        }
     }
 
 
-//    private boolean drawRadius(Graphics g, Radius r){
-//
-//        int centerX = r.getCenter().getX();
-//        int centerY = r.getCenter().getY();
-//        int endX = r.getEnd().getX();
-//        int endY = r.getEnd().getY();
-//        int circleRadius = r.getAdjacentCircle().getRadius();
-//
-//        double length = Math.sqrt(Math.abs(Math.pow(endX-centerX,2)+(Math.pow(endY-centerY,2))));
-//        double subtract = circleRadius-length;
-//        if(Math.abs(subtract)<0.2){
-//
-//            int coordStartX = getWidth() / 2 + centerX * STEP_SIZE;
-//            int coordStartY = getHeight() / 2 - centerY * STEP_SIZE;
-//            int coordEndX = getWidth() / 2 + endX * STEP_SIZE;
-//            int coordEndY =  getHeight() / 2 - endY * STEP_SIZE;
-//
-//            Graphics2D g2d = (Graphics2D) g;
-//            g2d.setStroke(new BasicStroke(2.0f));
-//            g.setColor(Color.BLACK);
-//            g.drawLine(coordStartX, coordStartY, coordEndX, coordEndY);
-//            return true;
-//        }
-//        else System.out.println("Точка "+r.getCenter().getId()+" або "+r.getEnd().getId()+" не належать колу " + r.getAdjacentCircle().getId());
-//        return false;
-//    }
+    private void drawMedian(Graphics g, String[] ids) {
+        String medianParams = ids[0];
+        String oppositeParams = ids[1];
 
-    private void drawCartesianGrid(Graphics g) {
-        int width = getWidth();
-        int height = getHeight();
+        Point vertex = null;
+        Point opposite1 = null, opposite2 = null;
 
-        g.setColor(Color.LIGHT_GRAY);
-        for (int i = STEP_SIZE; i < width; i += STEP_SIZE) {
-            g.drawLine(i, 0, i, height);
+        String vertexID, midpointID;
+        String identifierRegex = "([A-Z]\\d*)";
+        Pattern pattern = Pattern.compile(identifierRegex);
+        Matcher medianMatcher = pattern.matcher(medianParams);
+        Matcher oppositeMatcher = pattern.matcher(oppositeParams);
+        List<String> groupedIds = new ArrayList<>();
+
+        while (medianMatcher.find()) {
+            groupedIds.add(medianMatcher.group());
         }
-        for (int i = STEP_SIZE; i < height; i += STEP_SIZE) {
-            g.drawLine(0, i, width, i);
+        while (oppositeMatcher.find()) {
+            groupedIds.add(oppositeMatcher.group());
+        }
+        vertexID = groupedIds.get(0);
+        midpointID = groupedIds.get(1);
+
+        for (Shape s : idTable) {
+            if (s instanceof Point p && p.getId().equals(vertexID)) {
+                vertex = p;
+            } else if (s instanceof Segment sg && sg.getId().equals(oppositeParams)) {
+                opposite1 = sg.getStart();
+                opposite2 = sg.getEnd();
+            }
         }
 
-        g.setColor(Color.BLACK);
-        g.drawLine(0, height / 2, width, height / 2);
-        g.drawLine(width / 2, 0, width / 2, height);
-
-        g.setColor(Color.RED);
-        for (int i = 0; i < width / 2; i += 5 * STEP_SIZE) {
-            int value = (i / (5 * STEP_SIZE)) * VALUE_STEP;
-            g.drawString(String.valueOf(value), width / 2 + i, height / 2 + 15);
-            g.drawString(String.valueOf(-value), width / 2 - i, height / 2 + 15);
+        if (vertex == null || opposite1 == null || opposite2 == null) {
+            System.out.println("Error: Missing points or segment for median calculation.");
+            return;
         }
 
-        for (int i = 100; i < height / 2; i += 5 * STEP_SIZE) {
-            int value = (i / (5 * STEP_SIZE)) * VALUE_STEP;
-            g.drawString(String.valueOf(-value), width / 2 + 5, height / 2 + i);
-            g.drawString(String.valueOf(value), width / 2 + 5, height / 2 - i);
+        int x1 = opposite1.getX(), y1 = opposite1.getY();
+        int x2 = opposite2.getX(), y2 = opposite2.getY();
+        int midpointX = (x1 + x2) / 2;
+        int midpointY = (y1 + y2) / 2;
+
+        Point midpoint = new Point(midpointID, midpointX, midpointY);
+
+        Segment median = new Segment(vertexID + midpointID, vertex, midpoint);
+
+        double lengthMedian = 0;
+        String measureMedian = null;
+
+        for(Segment s : mainShape.getHeights()){
+            if(s.getId().equals(medianParams) && s.getSegmentType().equals("median")){
+                lengthMedian = s.getLength();
+                measureMedian = s.getMeasure();
+            }
         }
+
+        drawSegment(g, median.getStart(), median.getEnd(), lengthMedian, measureMedian, 20, 20);
+        drawPoint(g, midpointX, midpointY, midpointX + 10, midpointY, midpoint.getId());
+        idTable.add(median);
+    }
+
+    private Point getPointById(String id) {
+        for (Shape shape : idTable) {
+            if (shape instanceof Point && ((Point) shape).getId().equals(id)) {
+                return (Point) shape;
+            }
+        }
+        return null;
     }
 
     public static GraphicWindow createAndShowGUI() {

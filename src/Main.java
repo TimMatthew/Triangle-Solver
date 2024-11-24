@@ -18,13 +18,17 @@ public class Main {
         // (6) Далі синтаксичному аналізатору
         // (7) По командах формувати малюнок до задачі
 
+        Scanner sc = new Scanner(System.in);
+        System.out.println("Введіть номер задачі: ");
+        short taskNumber = Short.parseShort(sc.nextLine());
+
         StringBuilder testConstructor = new StringBuilder();
         try (BufferedReader br = new BufferedReader(new FileReader("tests/tasks.txt"))) {
             String line;
             while ((line = br.readLine()) != null)
                 testConstructor.append(line).append("\n");
 
-            System.out.println("---------------TEST TASK---------------\n");
+            System.out.println("---------------TEST TASK---------------");
 
         }
         catch (IOException e) {
@@ -33,13 +37,11 @@ public class Main {
 
         // Отримання задачі
         String[] tasks = testConstructor.toString().split("\n");
-        Scanner sc = new Scanner(System.in);
-        System.out.println("Введіть номер задачі: ");
-        short taskNumber = Short.parseShort(sc.nextLine());
         String task;
 
         if(taskNumber>=0 && taskNumber<tasks.length) task=tasks[taskNumber];
         else task = tasks[0];
+        System.out.println(task+"\n");
         ArrayList<String> numericValues;
         task = Preprocessing.preprocessLiterals(task);
         HashMap<String, ArrayList<String>> numericProcess = Preprocessing.preprocessNumericValues(task, new ArrayList<>());
@@ -53,6 +55,7 @@ public class Main {
         //}
 
 
+        System.out.println("-------------UDPipe ANALYSIS-------------");
         try {
             String urlString = "https://lindat.mff.cuni.cz/services/udpipe/api/process";
             URL url = new URL(urlString);
@@ -87,6 +90,7 @@ public class Main {
             System.out.println(s);
         }
 
+
         ConLLUAnalyzer conLLUAnalyzer = new ConLLUAnalyzer(Objects.requireNonNull(ConLLUSplitArray), numericValues);
         System.out.println("Processed Text: ");
 
@@ -113,28 +117,32 @@ public class Main {
         LexicalAnalyzer la = new LexicalAnalyzer();
         List<Pair> tokens = la.analyze(textForLexer.toString());
 
-        for (Pair pair : tokens) {
-            System.out.println(pair);
-        }
+//        for (Pair pair : tokens) {
+//            System.out.println(pair);
+//        }
 
 
         // Синтаксичний та семантичний аналіз
         SyntaxAnalyzer sa = new SyntaxAnalyzer(tokens);
         AST ast = sa.parse();
 
-        System.out.println(ast);
+        //System.out.println(ast);
 
         // Запис дерева у команди
         ASTRecorder recorder = new ASTRecorder(ast);
         String geomCommands = recorder.recordAST();
 
         recorder.saveToFile("commands\\commands"+taskNumber+".txt", geomCommands);
-//
-//        // Виконання задач
-//        GraphicWindow window = GraphicWindow.createAndShowGUI();
-//        window.setCommands(geomCommands.split("\n"));
-//        String target = dc.getTarget();
-//        Solver solver = new Solver(mainShape, target);
+
+        // Виконання задач
+        GraphicWindow window = GraphicWindow.createAndShowGUI();
+        window.setCommands(geomCommands.split("\n"));
+        window.setMainShape(mainShape);
+
+
+        // Розв'язування
+        String target = dc.getTarget();
+        Solver solver = new Solver(mainShape, target);
 
 
     }
